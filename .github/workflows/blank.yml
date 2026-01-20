@@ -2,24 +2,31 @@ name: CI
 
 on:
   push:
-    paths-ignore: &ci_ignore_paths
+    paths-ignore:
       - ".github/workflows/**"
       - "assets/**"
       - "scripts/**"
-      # Editor configs
       - ".zed/**"
       - ".vscode/**"
-      # Docs
       - "documentation/**"
       - "**/*.md"
-      # The README is included in the Typedoc
       - "!README.md"
-      # Formatters
       - "eslint.config.json"
       - "prettier.config.json"
       - ".editorconfig"
   pull_request:
-    paths-ignore: *ci_ignore_paths
+    paths-ignore:
+      - ".github/workflows/**"
+      - "assets/**"
+      - "scripts/**"
+      - ".zed/**"
+      - ".vscode/**"
+      - "documentation/**"
+      - "**/*.md"
+      - "!README.md"
+      - "eslint.config.json"
+      - "prettier.config.json"
+      - ".editorconfig"
   workflow_dispatch:
 
 concurrency:
@@ -45,9 +52,7 @@ jobs:
           echo "Current version: $CURRENT_VERSION"
           LATEST_VERSION=$(npm view @mercuryworkshop/scramjet versions --json | jq -r '.[-1]' || echo "0.0.0")
           echo "Latest NPM version: $LATEST_VERSION"
-
-          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ];
-          then
+          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
             echo "Version changed"
             echo "version_changed=true" >> "$GITHUB_OUTPUT"
             echo "new_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
@@ -164,6 +169,7 @@ jobs:
 
       - name: Run package validation tests
         run: pnpm test:package
+
   tests:
     name: Run Scramjet Tests
     runs-on: ubuntu-latest
