@@ -1,227 +1,1063 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grok Chat</title>
-<script src="https://js.puter.com/v2/"></script>
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>roblox's Dashboard</title>
+  <style>
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f0f2f5;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: #0a0e17;
+      color: white;
+      overflow: hidden;
+      height: 100vh;
+      box-sizing: border-box;
     }
 
-    h2 {
-        color: #333;
+    /* ====================== LOADING SCREEN - ALL ANIMATIONS KEPT ====================== */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 1.5s ease;
     }
 
-    #chatContainer {
-        width: 100%;
-        max-width: 600px;
-        background: #fff;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        overflow-y: auto;
-        max-height: 70vh;
-        display: flex;
-        flex-direction: column;
+    #loading-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
     }
 
-    .message {
-        display: flex;
-        align-items: flex-start;
-        margin: 10px 0;
-        opacity: 0;
-        transform: translateY(10px);
-        animation: fadeIn 0.3s forwards;
+    .ps5-logo-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .ps5-logo {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ps5-logo::before {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      background: radial-gradient(circle, rgba(0,122,255,0.6) 0%, transparent 70%);
+      border-radius: 50%;
+      opacity: 0;
+      animation: glowPulse 3s infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.2); }
+    }
+
+    .loading-title {
+      margin-top: 50px;
+      font-size: 3.8em;
+      font-weight: bold;
+      letter-spacing: 12px;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeInText 2s forwards 1s;
+    }
+
+    @keyframes fadeInText {
+      to { opacity: 1; }
+    }
+
+    .loading-title span {
+      display: inline-block;
+      opacity: 0;
+      animation: letterPop 0.6s forwards;
+    }
+
+    @keyframes letterPop {
+      0% { opacity: 0; transform: translateY(50px) scale(0.5); }
+      60% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .loading-bar-container {
+      width: 400px;
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 5px;
+      margin-top: 60px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0,122,255,0.3);
+    }
+
+    .loading-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #007aff, #00aaff, #007aff);
+      border-radius: 5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .loading-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shine 2s infinite;
+    }
+
+    @keyframes shine {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .particles {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #007aff;
+      border-radius: 50%;
+      opacity: 0;
+      animation: particleFloat 8s infinite linear;
+    }
+
+    @keyframes particleFloat {
+      0% { opacity: 0; transform: translateY(100vh) translateX(0); }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      100% { opacity: 0; transform: translateY(-100px) translateX(100px); }
+    }
+
+    /* ====================== NAME SCREEN ====================== */
+    #name-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #001133, #000);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+    }
+
+    #name-screen.active {
+      display: flex;
+    }
+
+    .name-box {
+      background: rgba(255,255,255,0.08);
+      padding: 50px 80px;
+      border-radius: 30px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 20px 60px rgba(0,122,255,0.4);
+      text-align: center;
+      animation: fadeIn 1s ease;
     }
 
     @keyframes fadeIn {
-        to {opacity: 1; transform: translateY(0);}
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .user {
-        justify-content: flex-end;
+    .name-box h1 {
+      font-size: 3em;
+      margin-bottom: 30px;
+      color: #007aff;
     }
 
-    .bubble {
-        padding: 12px 18px;
-        border-radius: 20px;
-        max-width: 70%;
-        word-wrap: break-word;
-        position: relative;
+    #name-input {
+      padding: 18px 30px;
+      width: 300px;
+      font-size: 1.4em;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid #007aff;
+      border-radius: 15px;
+      color: white;
+      text-align: center;
     }
 
-    .user .bubble {
-        background-color: #007bff;
-        color: white;
-        border-bottom-right-radius: 0;
+    #name-input:focus {
+      outline: none;
+      border-color: #00aaff;
+      box-shadow: 0 0 20px rgba(0,170,255,0.6);
     }
 
-    .grok .bubble {
-        background-color: #e5e5ea;
-        color: black;
-        border-bottom-left-radius: 0;
+    #name-btn {
+      margin-top: 30px;
+      padding: 18px 50px;
+      background: #007aff;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.4em;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(0,122,255,0.6);
     }
 
-    .avatar {
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        margin: 0 10px;
-        flex-shrink: 0;
+    /* ====================== MAIN DASHBOARD ====================== */
+    .background {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+      filter: brightness(0.5);
+      transition: background-image 1.2s ease;
     }
 
-    #inputContainer {
-        margin-top: 15px;
-        width: 100%;
-        max-width: 600px;
-        display: flex;
+    .gui-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 14, 23, 0.65);
+      backdrop-filter: blur(8px);
+      z-index: -1;
+      pointer-events: none;
     }
 
-    #userInput {
-        flex: 1;
-        padding: 12px 18px;
-        border-radius: 25px;
-        border: 1px solid #ccc;
-        outline: none;
-        font-size: 16px;
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: relative;
+      opacity: 0;
+      transition: opacity 1s ease;
     }
 
-    #sendBtn {
-        margin-left: 10px;
-        padding: 12px 20px;
-        border-radius: 25px;
-        border: none;
-        background-color: #007bff;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background 0.3s;
+    .container.visible {
+      opacity: 1;
     }
 
-    #sendBtn:hover {
-        background-color: #0056b3;
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 30px;
+      background: rgba(10, 14, 23, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 10;
     }
 
-    #typingIndicator {
-        font-style: italic;
-        color: gray;
-        margin: 5px 0 10px 50px;
-        display: none;
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
     }
 
-    .timestamp {
-        font-size: 10px;
-        color: gray;
-        margin-top: 3px;
-        text-align: right;
+    .header h1 {
+      font-size: 1.8em;
+      margin: 0;
     }
-</style>
+
+    /* Live Clock */
+    .live-clock {
+      font-size: 1.6em;
+      font-weight: bold;
+      color: #00aaff;
+      text-shadow: 0 0 15px rgba(0,170,255,0.6);
+    }
+
+    /* Settings Button */
+    .settings-btn {
+      width: 50px;
+      height: 50px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(0,122,255,0.4);
+    }
+
+    .settings-btn:hover {
+      background: #007aff;
+      transform: rotate(60deg);
+      box-shadow: 0 0 30px rgba(0,122,255,0.8);
+    }
+
+    .settings-icon {
+      font-size: 26px;
+    }
+
+    /* Settings Panel */
+    #settings-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      width: 500px;
+      background: rgba(10, 14, 23, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      padding: 40px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+      border: 1px solid rgba(0,122,255,0.4);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s ease;
+    }
+
+    #settings-panel.open {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .settings-header h2 {
+      font-size: 2.5em;
+      color: #007aff;
+    }
+
+    .close-settings {
+      font-size: 34px;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close-settings:hover {
+      color: #ff4444;
+    }
+
+    .theme-section {
+      margin-bottom: 40px;
+    }
+
+    .theme-section h3 {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #00aaff;
+    }
+
+    .themes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .theme-option {
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .theme-option:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+    }
+
+    .theme-option.active {
+      border-color: #007aff;
+      box-shadow: 0 0 30px rgba(0,122,255,0.6);
+    }
+
+    .theme-color {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 15px;
+      background: linear-gradient(45deg, var(--p), var(--s));
+      box-shadow: 0 0 25px var(--p);
+    }
+
+    .theme-name {
+      font-size: 1.3em;
+    }
+
+    .version-info {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 1.2em;
+      opacity: 0.8;
+    }
+
+    .version-info strong {
+      color: #00aaff;
+      font-size: 1.5em;
+    }
+
+    /* Theme Variables */
+    :root {
+      --primary: #007aff;
+      --secondary: #00aaff;
+    }
+
+    .tab.active, .tab:hover {
+      background: var(--primary);
+      box-shadow: 0 0 20px var(--primary);
+    }
+
+    .card.active {
+      outline: 5px solid var(--primary);
+      box-shadow: 0 35px 70px var(--primary);
+    }
+
+    .launch-btn {
+      background: var(--primary);
+      box-shadow: 0 0 30px var(--primary);
+    }
+
+    .settings-btn:hover {
+      background: var(--primary);
+      box-shadow: 0 0 30px var(--primary);
+    }
+
+    .section-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 15px;
+      background: rgba(10, 14, 23, 0.8);
+      backdrop-filter: blur(10px);
+    }
+
+    .carousel {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      padding: 0 80px;
+    }
+
+    .section {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+
+    .section.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .cards {
+      display: flex;
+      transition: transform 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+      gap: 35px;
+      padding: 0 120px;
+    }
+
+    .card {
+      min-width: 260px;
+      width: 260px;
+      height: 360px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 24px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+      filter: brightness(0.75);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .card.active {
+      transform: scale(1.25);
+      filter: brightness(1);
+      z-index: 5;
+      box-shadow: 0 35px 70px var(--primary);
+      outline: 5px solid var(--primary);
+    }
+
+    .card:not(.active) {
+      opacity: 0.65;
+      transform: scale(0.92);
+    }
+
+    .card-title {
+      position: absolute;
+      bottom: 20px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 1.4em;
+      background: rgba(0,0,0,0.7);
+      padding: 12px;
+      border-radius: 0 0 24px 24px;
+    }
+
+    .details {
+      position: absolute;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 380px;
+      padding: 30px;
+      background: rgba(10, 14, 23, 0.85);
+      backdrop-filter: blur(15px);
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      z-index: 6;
+    }
+
+    .launch-btn {
+      margin-top: 30px;
+      padding: 18px 40px;
+      background: var(--primary);
+      border: none;
+      border-radius: 50px;
+      color: white;
+      font-size: 1.4em;
+      cursor: pointer;
+      box-shadow: 0 0 30px var(--primary);
+      text-transform: uppercase;
+    }
+
+    #app-window {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: none;
+      flex-direction: column;
+      z-index: 50;
+    }
+
+    #app-header {
+      height: 60px;
+      background: rgba(0,122,255,0.95);
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      justify-content: space-between;
+      font-size: 1.8em;
+    }
+
+    #close-app {
+      font-size: 34px;
+      cursor: pointer;
+    }
+
+    #app-iframe {
+      flex: 1;
+      border: none;
+    }
+  </style>
 </head>
 <body>
 
-<h2>Grok Chat</h2>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="particles" id="particles"></div>
 
-<div id="chatContainer"></div>
-<div id="typingIndicator">Grok is typing<span id="dots">...</span></div>
+    <div class="ps5-logo-container">
+      <svg class="ps5-logo" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="150" cy="150" r="120" fill="none" stroke="#007aff" stroke-width="15" opacity="0.6"/>
+        <path d="M100 150 Q150 70, 200 150" fill="none" stroke="#007aff" stroke-width="20" stroke-linecap="round"/>
+        <circle cx="150" cy="150" r="40" fill="none" stroke="#007aff" stroke-width="15"/>
+        <path d="M120 150 L150 180 L180 150" fill="none" stroke="#007aff" stroke-width="15" stroke-linecap="round"/>
+        <rect x="135" y="135" width="30" height="30" rx="8" fill="none" stroke="#007aff" stroke-width="12"/>
+      </svg>
+    </div>
 
-<div id="inputContainer">
-    <input type="text" id="userInput" placeholder="Type a message..." />
-    <button id="sendBtn">Send</button>
-</div>
+    <div class="loading-title">
+      <span>D</span><span>A</span><span>S</span><span>H</span><span>B</span><span>O</span><span>A</span><span>R</span><span>D</span>
+    </div>
 
-<script>
-const chatContainer = document.getElementById('chatContainer');
-const typingIndicator = document.getElementById('typingIndicator');
-const dots = document.getElementById('dots');
-const userInput = document.getElementById('userInput');
-const sendBtn = document.getElementById('sendBtn');
+    <div class="loading-bar-container">
+      <div class="loading-fill" id="loading-fill"></div>
+    </div>
+  </div>
 
-// Typing dots animation
-let dotInterval;
-function startDots() {
-    let count = 0;
-    dotInterval = setInterval(() => {
-        dots.textContent = '.'.repeat(count % 4);
-        count++;
-    }, 500);
-}
+  <!-- Name Screen -->
+  <div id="name-screen">
+    <div class="name-box">
+      <h1>Welcome</h1>
+      <input type="text" id="name-input" placeholder="Enter your name" maxlength="20">
+      <button id="name-btn">Continue</button>
+    </div>
+  </div>
 
-function stopDots() {
-    clearInterval(dotInterval);
-    dots.textContent = '...';
-}
+  <!-- Background layers -->
+  <div class="background" id="background"></div>
+  <div class="gui-overlay"></div>
 
-// Add message to chat
-function addMessage(sender, text) {
-    const msgDiv = document.createElement('div');
-    msgDiv.classList.add('message', sender.toLowerCase());
+  <!-- Main Dashboard -->
+  <div class="container" id="main-container">
+    <div class="header">
+      <div class="header-left">
+        <h1 id="user-greeting">roblox's Dashboard</h1>
+        <div class="live-clock" id="live-clock"></div>
+      </div>
+      <div class="settings-btn" id="settings-btn">
+        <div class="settings-icon">⚙️</div>
+      </div>
+    </div>
 
-    const avatarURL = sender === 'Grok' 
-        ? 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSs0Ux2J4JTtCrgWzAyo7upfUYK68ENbT3Tvg&s' // Grok avatar
-        : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeZfb53p6VjbKWaCCuDlBK-fF53CXgnrlw4g&s'; // User avatar
+    <!-- Settings Panel -->
+    <div id="settings-panel">
+      <div class="settings-header">
+        <h2>Settings</h2>
+        <div class="close-settings" id="close-settings">×</div>
+      </div>
 
-    const now = new Date();
-    const timestamp = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      <div class="theme-section">
+        <h3>Choose Theme</h3>
+        <div class="themes-grid">
+          <div class="theme-option active" data-p="#007aff" data-s="#00aaff">
+            <div class="theme-color" style="--p:#007aff;--s:#00aaff;"></div>
+            <div class="theme-name">Blue</div>
+          </div>
+          <div class="theme-option" data-p="#9d4edd" data-s="#d787ff">
+            <div class="theme-color" style="--p:#9d4edd;--s:#d787ff;"></div>
+            <div class="theme-name">Purple</div>
+          </div>
+          <div class="theme-option" data-p="#00d4aa" data-s="#00f5a0">
+            <div class="theme-color" style="--p:#00d4aa;--s:#00f5a0;"></div>
+            <div class="theme-name">Green</div>
+          </div>
+          <div class="theme-option" data-p="#ff8c00" data-s="#ff6b00">
+            <div class="theme-color" style="--p:#ff8c00;--s:#ff6b00;"></div>
+            <div class="theme-name">Orange</div>
+          </div>
+          <div class="theme-option" data-p="#ff8bdc" data-s="#ff2a6d">
+            <div class="theme-color" style="--p:#ff8bdc;--s:#ff2a6d;"></div>
+            <div class="theme-name">Pink</div>
+          </div>
+          <div class="theme-option" data-p="#ff9500" data-s="#ff3b30">
+            <div class="theme-color" style="--p:#ff9500;--s:#ff3b30;"></div>
+            <div class="theme-name">Red</div>
+          </div>
+        </div>
+      </div>
 
-    msgDiv.innerHTML = `
-        <img class="avatar" src="${avatarURL}" />
-        <div class="bubble"><strong>${sender}:</strong> ${text}<div class="timestamp">${timestamp}</div></div>
-    `;
+      <div class="version-info">
+        Version <strong>1.1.2</strong><br>
+        More updates coming soon...
+      </div>
+    </div>
 
-    chatContainer.appendChild(msgDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-}
+    <div class="section-tabs">
+      <div class="tab active" data-section="proxy">Proxy</div>
+      <div class="tab" data-section="ai">AI</div>
+      <div class="tab" data-section="games">Games & Emulators</div>
+    </div>
 
-// Send message to Grok with retry
-async function sendMessage() {
-    const message = userInput.value.trim();
-    if (!message) return;
+    <div class="carousel">
+      <!-- All sections and cards - exactly as you provided -->
+      <div class="section active" id="proxy-section">
+        <div class="cards" id="proxy-cards">
+          <div class="card active"
+               style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7gaDPF7UZyqMvHCg16jkM9w0n5WzVhZlw7A&s');"
+               data-title="Main Proxy"
+               data-desc="Secure proxy browsing."
+               data-bg="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7gaDPF7UZyqMvHCg16jkM9w0n5WzVhZlw7A&s"
+               data-url="https://sciences.drsanjay.com.au/">
+            <div class="card-title">Main Proxy</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcSRtrRTnU8suWDygvkAvHCQ-i39bCgE7mkw&s');"
+               data-title="Stealth Proxy"
+               data-desc="Undetectable browsing."
+               data-bg="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcSRtrRTnU8suWDygvkAvHCQ-i39bCgE7mkw&s"
+               data-url="https://sciences.drsanjay.com.au/">
+            <div class="card-title">Proxy by Anderson</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://cyberpedia.reasonlabs.com/IMG/proxy%20server.jpg');"
+               data-title="Fast Proxy"
+               data-desc="High-speed connection."
+               data-bg="https://cyberpedia.reasonlabs.com/IMG/proxy%20server.jpg"
+               data-url="https://vseesa.quasar.ploteando.com/">
+            <div class="card-title">Fast Proxy</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqXoNnPklxzy5zR5YndSh139Xs8nZ8Jdj1Ug&s');"
+               data-title="Proxy Hub"
+               data-desc="Multiple server options."
+               data-bg="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqXoNnPklxzy5zR5YndSh139Xs8nZ8Jdj1Ug&s"
+               data-url="https://cargolux.starnightimport.com/">
+            <div class="card-title">Proxy Hub</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPNWup5WQNCln_0aTySZ5Into1o1VAI3TTow&s');"
+               data-title="Anonymous Proxy"
+               data-desc="Complete anonymity."
+               data-bg="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPNWup5WQNCln_0aTySZ5Into1o1VAI3TTow&s"
+               data-url="https://sciences.drsanjay.com.au/">
+            <div class="card-title">Anonymous Proxy</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3RDElb3ekISL8x7uxmhhpG66pXWqu8r7k0A&s');"
+               data-title="Secure Proxy"
+               data-desc="Encrypted traffic."
+               data-bg="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3RDElb3ekISL8x7uxmhhpG66pXWqu8r7k0A&s"
+               data-url="https://sciences.drsanjay.com.au/">
+            <div class="card-title">Secure Proxy</div>
+          </div>
+        </div>
+      </div>
 
-    addMessage('User', message);
-    userInput.value = '';
-    userInput.disabled = true;
-    sendBtn.disabled = true;
+      <div class="section" id="ai-section">
+        <div class="cards" id="ai-cards">
+          <div class="card active"
+               style="background-image: url('https://images.stockcake.com/public/1/b/4/1b411215-b8c4-4859-aa96-757915fb8f99_large/human-ai-interface-stockcake.jpg');"
+               data-title="Digital AI"
+               data-desc="Advanced digital AI chat."
+               data-bg="https://thumbs.dreamstime.com/b/metaverse-fantasy-concept-person-visits-futuristic-cyber-city-generative-ai-virtual-fantastic-world-theme-portal-vr-268666913.jpg"
+               data-url="https://digitalprotgtemplate-38441.chipp.ai/w/chat/">
+            <div class="card-title">Digital AI</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://wallpapercave.com/wp/wp10724398.jpg');"
+               data-title="ChatGPT"
+               data-desc="OpenAI's powerful model."
+               data-bg="https://wallpapercave.com/wp/wp10724398.jpg"
+               data-url="https://chat.openai.com">
+            <div class="card-title">ChatGPT</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://wallpapercave.com/wp/wp12234567.jpg');"
+               data-title="Grok"
+               data-desc="xAI's helpful assistant."
+               data-bg="https://wallpapercave.com/wp/wp12234567.jpg"
+               data-url="https://grok.x.ai">
+            <div class="card-title">Grok</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://i.imgur.com/3d5eR9k.jpg');"
+               data-title="Claude"
+               data-desc="Anthropic's safe AI."
+               data-bg="https://i.imgur.com/3d5eR9k.jpg"
+               data-url="https://claude.ai">
+            <div class="card-title">Claude</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://wallpapercave.com/wp/wp11456789.jpg');"
+               data-title="Gemini"
+               data-desc="Google's multimodal AI."
+               data-bg="https://wallpapercave.com/wp/wp11456789.jpg"
+               data-url="https://gemini.google.com">
+            <div class="card-title">Gemini</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://wallpapercave.com/wp/wp12567890.jpg');"
+               data-title="Perplexity"
+               data-desc="AI search engine."
+               data-bg="https://wallpapercave.com/wp/wp12567890.jpg"
+               data-url="https://www.perplexity.ai">
+            <div class="card-title">Perplexity</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://wallpapercave.com/wp/wp13098765.jpg');"
+               data-title="Mistral"
+               data-desc="Open-source AI model."
+               data-bg="https://wallpapercave.com/wp/wp13098765.jpg">
+            <div class="card-title">Mistral</div>
+          </div>
+        </div>
+      </div>
 
-    typingIndicator.style.display = 'block';
-    startDots();
+      <div class="section" id="games-section">
+        <div class="cards" id="games-cards">
+          <div class="card active"
+               style="background-image: url('https://wallpapers.com/images/featured/ubuntu-z6rtxbp6rijb53hx.jpg');"
+               data-title="Linux Emulator"
+               data-desc="Full Ubuntu environment."
+               data-bg="https://wallpapers.com/images/featured/ubuntu-z6rtxbp6rijb53hx.jpg"
+               data-url="https://www.winfy.net/runwine/index.php?os=winegui_2_ubuntu-22-amd64">
+            <div class="card-title">Linux Emulator</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202008/1020/Kq7iou5mZ9y6HlbF7QGCGS2P.jpg');"
+               data-title="Astro's Playroom"
+               data-desc="Fun platformer."
+               data-bg="https://wallpapercave.com/wp/wp6980742.jpg">
+            <div class="card-title">Astro's Playroom</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202008/1300/5JzcA5RKo3i3p1t2Q0qXzQ.png');"
+               data-title="Spider-Man: Miles Morales"
+               data-desc="Superhero action."
+               data-bg="https://wallpapercave.com/wp/wp6623882.jpg">
+            <div class="card-title">Spider-Man</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202011/0319/1mC3Ve0x5A7MIRl1K5Wc1u4B.png');"
+               data-title="God of War Ragnarök"
+               data-desc="Epic mythology."
+               data-bg="https://wallpapercave.com/wp/wp10567890.jpg">
+            <div class="card-title">God of War</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202009/2819/8pF8X4U1M2k3l4n5o6p7q8r9.jpg');"
+               data-title="Horizon Forbidden West"
+               data-desc="Beautiful open world."
+               data-bg="https://wallpapercave.com/wp/wp9876543.jpg">
+            <div class="card-title">Horizon</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202106/2815/0vPqL8X9Y7Z6A5B4C3D2E1F0.jpg');"
+               data-title="Gran Turismo 7"
+               data-desc="Racing simulator."
+               data-bg="https://wallpapercave.com/wp/wp8765432.jpg">
+            <div class="card-title">GT7</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202108/1021/1a2b3c4d5e6f7g8h9i0j.jpg');"
+               data-title="Returnal"
+               data-desc="Roguelike shooter."
+               data-bg="https://wallpapercave.com/wp/wp7654321.jpg">
+            <div class="card-title">Returnal</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202111/3011/0Z8p8f5g6h7i8j9k0l.jpg');"
+               data-title="Ratchet & Clank"
+               data-desc="Dimension-hopping fun."
+               data-bg="https://wallpapercave.com/wp/wp8835718.jpg">
+            <div class="card-title">Ratchet & Clank</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://wallpapercave.com/wp/wp4059432.jpg');"
+               data-title="Roblox"
+               data-desc="Create and play games."
+               data-bg="https://wallpapercave.com/wp/wp4059432.jpg"
+               data-url="https://www.roblox.com">
+            <div class="card-title">Roblox</div>
+          </div>
+          <div class="card"
+               style="background-image: url('https://wallpapercave.com/wp/wp5868375.jpg');"
+               data-title="Discord"
+               data-desc="Voice & text chat."
+               data-bg="https://wallpapercave.com/wp/wp5868375.jpg"
+               data-url="https://discord.com">
+            <div class="card-title">Discord</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    try {
-        const response = await puter.ai.chat(message, {model: 'x-ai/grok-4.1-fast'});
-        addMessage('Grok', response.message.content);
-    } catch (err) {
-        console.error(err);
-        addMessage('Grok', 'Hmm… something went wrong. Retrying...');
-        // Retry once
-        try {
-            const retryResponse = await puter.ai.chat(message, {model: 'x-ai/grok-4.1-fast'});
-            addMessage('Grok', retryResponse.message.content);
-        } catch (retryErr) {
-            console.error(retryErr);
-            addMessage('Grok', 'Still not working. Please try again later.');
-        }
-    } finally {
-        typingIndicator.style.display = 'none';
-        stopDots();
-        userInput.disabled = false;
-        sendBtn.disabled = false;
-        userInput.focus();
+    <div class="details" id="details">
+      <h1>Main Proxy</h1>
+      <p>Secure proxy browsing.</p>
+      <button class="launch-btn" id="launch-btn">Launch</button>
+    </div>
+  </div>
+
+  <div id="app-window">
+    <div id="app-header">
+      <span id="app-title">App</span>
+      <span id="close-app">×</span>
+    </div>
+    <iframe id="app-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"></iframe>
+  </div>
+
+  <script>
+    // Particles
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+      const particle = document.createElement('div');
+      particle.classList.add('particle');
+      particle.style.left = Math.random() * 100 + 'vw';
+      particle.style.animationDelay = Math.random() * 8 + 's';
+      particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+      particlesContainer.appendChild(particle);
     }
-}
 
-// Event listeners
-sendBtn.addEventListener('click', sendMessage);
-userInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendMessage();
-});
-</script>
+    document.querySelectorAll('.loading-title span').forEach((span, i) => {
+      span.style.animationDelay = (i * 0.1 + 1.5) + 's';
+    });
 
+    // Loading & Name
+    const loadingFill = document.getElementById('loading-fill');
+    const loadingScreen = document.getElementById('loading-screen');
+    const nameScreen = document.getElementById('name-screen');
+    const mainContainer = document.getElementById('main-container');
+    const userGreeting = document.getElementById('user-greeting');
+
+    let progress = 0;
+    const loadingInterval = setInterval(() => {
+      progress += Math.random() * 12 + 3;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(loadingInterval);
+        loadingFill.style.width = '100%';
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+          setTimeout(() => nameScreen.classList.add('active'), 600);
+        }, 1000);
+      }
+      loadingFill.style.width = progress + '%';
+    }, 200);
+
+    const nameInput = document.getElementById('name-input');
+    const nameBtn = document.getElementById('name-btn');
+    nameBtn.addEventListener('click', saveName);
+    nameInput.addEventListener('keypress', e => { if (e.key === 'Enter') saveName(); });
+
+    function saveName() {
+      let name = nameInput.value.trim() || 'roblox';
+      userGreeting.textContent = `${name}'s Dashboard`;
+      nameScreen.style.opacity = '0';
+      setTimeout(() => {
+        nameScreen.style.display = 'none';
+        mainContainer.classList.add('visible');
+        startLiveClock();
+      }, 800);
+    }
+
+    // Live Clock
+    function startLiveClock() {
+      const clock = document.getElementById('live-clock');
+      function update() {
+        const now = new Date();
+        const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+        clock.textContent = now.toLocaleTimeString(undefined, options);
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    // Settings Panel & Theme Switch
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsPanel = document.getElementById('settings-panel');
+    const closeSettings = document.getElementById('close-settings');
+    const themeOptions = document.querySelectorAll('.theme-option');
+
+    settingsBtn.addEventListener('click', () => settingsPanel.classList.add('open'));
+    closeSettings.addEventListener('click', () => settingsPanel.classList.remove('open'));
+
+    document.addEventListener('click', (e) => {
+      if (!settingsPanel.contains(e.target) && !settingsBtn.contains(e.target) && settingsPanel.classList.contains('open')) {
+        settingsPanel.classList.remove('open');
+      }
+    });
+
+    themeOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        themeOptions.forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+
+        const p = option.dataset.p;
+        const s = option.dataset.s;
+
+        document.documentElement.style.setProperty('--primary', p);
+        document.documentElement.style.setProperty('--secondary', s);
+      });
+    });
+
+    // Original carousel & navigation logic
+    const tabs = document.querySelectorAll('.tab');
+    const sections = document.querySelectorAll('.section');
+    let currentSection = 'proxy';
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.section;
+        if (target === currentSection) return;
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        sections.forEach(s => s.classList.remove('active'));
+        document.getElementById(target + '-section').classList.add('active');
+        currentSection = target;
+        resetCarousel(target);
+      });
+    });
+
+    function resetCarousel(section) {
+      const container = document.getElementById(section + '-cards');
+      const cards = container.querySelectorAll('.card');
+      cards.forEach((c, i) => c.classList.toggle('active', i === 0));
+      const activeCard = cards[0];
+      document.querySelector('#details h1').textContent = activeCard.dataset.title;
+      document.querySelector('#details p').textContent = activeCard.dataset.desc;
+      document.getElementById('background').style.backgroundImage = `url(${activeCard.dataset.bg})`;
+      const cardWidth = cards[0].offsetWidth + 35;
+      const offset = (window.innerWidth / 2 - cardWidth / 2);
+      container.style.transform = `translateX(${offset}px)`;
+      cards.forEach((card, i) => card.onclick = () => updateActiveSection(section, i));
+    }
+
+    function updateActiveSection(section, index) {
+      const container = document.getElementById(section + '-cards');
+      const cards = container.querySelectorAll('.card');
+      cards.forEach((c, i) => c.classList.toggle('active', i === index));
+      const activeCard = cards[index];
+      document.querySelector('#details h1').textContent = activeCard.dataset.title;
+      document.querySelector('#details p').textContent = activeCard.dataset.desc;
+      document.getElementById('background').style.backgroundImage = `url(${activeCard.dataset.bg})`;
+      const cardWidth = cards[0].offsetWidth + 35;
+      const offset = -index * cardWidth + (window.innerWidth / 2 - cardWidth / 2);
+      container.style.transform = `translateX(${offset}px)`;
+    }
+
+    document.getElementById('launch-btn').addEventListener('click', () => {
+      const activeCard = document.querySelector('.section.active .card.active');
+      if (activeCard && activeCard.dataset.url) {
+        document.getElementById('app-iframe').src = activeCard.dataset.url;
+        document.getElementById('app-title').textContent = activeCard.dataset.title;
+        document.getElementById('app-window').style.display = 'flex';
+      }
+    });
+
+    document.getElementById('close-app').addEventListener('click', () => {
+      document.getElementById('app-window').style.display = 'none';
+      document.getElementById('app-iframe').src = '';
+    });
+
+    document.addEventListener('keydown', e => {
+      if (document.getElementById('app-window').style.display === 'flex') return;
+      const activeSectionEl = document.querySelector('.section.active');
+      const cards = activeSectionEl.querySelectorAll('.card');
+      let idx = Array.from(cards).findIndex(c => c.classList.contains('active'));
+      if (e.key === 'ArrowRight') updateActiveSection(currentSection, (idx + 1) % cards.length);
+      if (e.key === 'ArrowLeft') updateActiveSection(currentSection, (idx - 1 + cards.length) % cards.length);
+      if (e.key === 'Enter') document.getElementById('launch-btn').click();
+    });
+
+    let touchStartX = 0;
+    document.querySelector('.carousel').addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
+    document.querySelector('.carousel').addEventListener('touchend', e => {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 50) {
+        const activeSectionEl = document.querySelector('.section.active');
+        const cards = activeSectionEl.querySelectorAll('.card');
+        let idx = Array.from(cards).findIndex(c => c.classList.contains('active'));
+        const newIdx = diff > 0 ? (idx + 1) % cards.length : (idx - 1 + cards.length) % cards.length;
+        updateActiveSection(currentSection, newIdx);
+      }
+    });
+
+    resetCarousel('proxy');
+  </script>
 </body>
 </html>
