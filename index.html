@@ -2,1062 +2,538 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>roblox's Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>roblox's Mega Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;500&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background: #0a0e17;
-      color: white;
-      overflow: hidden;
-      height: 100vh;
-      box-sizing: border-box;
-    }
-
-    /* ====================== LOADING SCREEN - ALL ANIMATIONS KEPT ====================== */
-    #loading-screen {
-      position: fixed;
-      inset: 0;
-      background: #000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      transition: opacity 1.5s ease;
-    }
-
-    #loading-screen.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .ps5-logo-container {
-      position: relative;
-      width: 300px;
-      height: 300px;
-      animation: float 4s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-20px); }
-      100% { transform: translateY(0px); }
-    }
-
-    .ps5-logo {
-      width: 100%;
-      height: 100%;
-    }
-
-    .ps5-logo::before {
-      content: '';
-      position: absolute;
-      inset: -20px;
-      background: radial-gradient(circle, rgba(0,122,255,0.6) 0%, transparent 70%);
-      border-radius: 50%;
-      opacity: 0;
-      animation: glowPulse 3s infinite;
-    }
-
-    @keyframes glowPulse {
-      0%, 100% { opacity: 0; transform: scale(1); }
-      50% { opacity: 0.8; transform: scale(1.2); }
-    }
-
-    .loading-title {
-      margin-top: 50px;
-      font-size: 3.8em;
-      font-weight: bold;
-      letter-spacing: 12px;
-      text-transform: uppercase;
-      opacity: 0;
-      animation: fadeInText 2s forwards 1s;
-    }
-
-    @keyframes fadeInText {
-      to { opacity: 1; }
-    }
-
-    .loading-title span {
-      display: inline-block;
-      opacity: 0;
-      animation: letterPop 0.6s forwards;
-    }
-
-    @keyframes letterPop {
-      0% { opacity: 0; transform: translateY(50px) scale(0.5); }
-      60% { opacity: 1; transform: translateY(-10px) scale(1.1); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .loading-bar-container {
-      width: 400px;
-      height: 10px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 5px;
-      margin-top: 60px;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(0,122,255,0.3);
-    }
-
-    .loading-fill {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, #007aff, #00aaff, #007aff);
-      border-radius: 5px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .loading-fill::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-      animation: shine 2s infinite;
-    }
-
-    @keyframes shine {
-      0% { left: -100%; }
-      100% { left: 100%; }
-    }
-
-    .particles {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-    }
-
-    .particle {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: #007aff;
-      border-radius: 50%;
-      opacity: 0;
-      animation: particleFloat 8s infinite linear;
-    }
-
-    @keyframes particleFloat {
-      0% { opacity: 0; transform: translateY(100vh) translateX(0); }
-      10% { opacity: 0.8; }
-      90% { opacity: 0.8; }
-      100% { opacity: 0; transform: translateY(-100px) translateX(100px); }
-    }
-
-    /* ====================== NAME SCREEN ====================== */
-    #name-screen {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, #001133, #000);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 90;
-    }
-
-    #name-screen.active {
-      display: flex;
-    }
-
-    .name-box {
-      background: rgba(255,255,255,0.08);
-      padding: 50px 80px;
-      border-radius: 30px;
-      backdrop-filter: blur(15px);
-      box-shadow: 0 20px 60px rgba(0,122,255,0.4);
-      text-align: center;
-      animation: fadeIn 1s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(50px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .name-box h1 {
-      font-size: 3em;
-      margin-bottom: 30px;
-      color: #007aff;
-    }
-
-    #name-input {
-      padding: 18px 30px;
-      width: 300px;
-      font-size: 1.4em;
-      background: rgba(255,255,255,0.1);
-      border: 2px solid #007aff;
-      border-radius: 15px;
-      color: white;
-      text-align: center;
-    }
-
-    #name-input:focus {
-      outline: none;
-      border-color: #00aaff;
-      box-shadow: 0 0 20px rgba(0,170,255,0.6);
-    }
-
-    #name-btn {
-      margin-top: 30px;
-      padding: 18px 50px;
-      background: #007aff;
-      border: none;
-      border-radius: 50px;
-      font-size: 1.4em;
-      cursor: pointer;
-      box-shadow: 0 0 30px rgba(0,122,255,0.6);
-    }
-
-    /* ====================== MAIN DASHBOARD ====================== */
-    .background {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-size: cover;
-      background-position: center;
-      z-index: -2;
-      filter: brightness(0.5);
-      transition: background-image 1.2s ease;
-    }
-
-    .gui-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(10, 14, 23, 0.65);
-      backdrop-filter: blur(8px);
-      z-index: -1;
-      pointer-events: none;
-    }
-
-    .container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      position: relative;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-
-    .container.visible {
-      opacity: 1;
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 15px 30px;
-      background: rgba(10, 14, 23, 0.8);
-      backdrop-filter: blur(10px);
-      z-index: 10;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .header h1 {
-      font-size: 1.8em;
-      margin: 0;
-    }
-
-    /* Live Clock */
-    .live-clock {
-      font-size: 1.6em;
-      font-weight: bold;
-      color: #00aaff;
-      text-shadow: 0 0 15px rgba(0,170,255,0.6);
-    }
-
-    /* Settings Button */
-    .settings-btn {
-      width: 50px;
-      height: 50px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 20px rgba(0,122,255,0.4);
-    }
-
-    .settings-btn:hover {
-      background: #007aff;
-      transform: rotate(60deg);
-      box-shadow: 0 0 30px rgba(0,122,255,0.8);
-    }
-
-    .settings-icon {
-      font-size: 26px;
-    }
-
-    /* Settings Panel */
-    #settings-panel {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.9);
-      width: 500px;
-      background: rgba(10, 14, 23, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 30px;
-      padding: 40px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.7);
-      border: 1px solid rgba(0,122,255,0.4);
-      z-index: 100;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.4s ease;
-    }
-
-    #settings-panel.open {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .settings-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-    }
-
-    .settings-header h2 {
-      font-size: 2.5em;
-      color: #007aff;
-    }
-
-    .close-settings {
-      font-size: 34px;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-
-    .close-settings:hover {
-      color: #ff4444;
-    }
-
-    .theme-section {
-      margin-bottom: 40px;
-    }
-
-    .theme-section h3 {
-      font-size: 1.8em;
-      margin-bottom: 20px;
-      color: #00aaff;
-    }
-
-    .themes-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    .theme-option {
-      padding: 20px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 2px solid transparent;
-    }
-
-    .theme-option:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-    }
-
-    .theme-option.active {
-      border-color: #007aff;
-      box-shadow: 0 0 30px rgba(0,122,255,0.6);
-    }
-
-    .theme-color {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin: 0 auto 15px;
-      background: linear-gradient(45deg, var(--p), var(--s));
-      box-shadow: 0 0 25px var(--p);
-    }
-
-    .theme-name {
-      font-size: 1.3em;
-    }
-
-    .version-info {
-      text-align: center;
-      margin-top: 30px;
-      font-size: 1.2em;
-      opacity: 0.8;
-    }
-
-    .version-info strong {
-      color: #00aaff;
-      font-size: 1.5em;
-    }
-
-    /* Theme Variables */
-    :root {
-      --primary: #007aff;
-      --secondary: #00aaff;
-    }
-
-    .tab.active, .tab:hover {
-      background: var(--primary);
-      box-shadow: 0 0 20px var(--primary);
-    }
-
-    .card.active {
-      outline: 5px solid var(--primary);
-      box-shadow: 0 35px 70px var(--primary);
-    }
-
-    .launch-btn {
-      background: var(--primary);
-      box-shadow: 0 0 30px var(--primary);
-    }
-
-    .settings-btn:hover {
-      background: var(--primary);
-      box-shadow: 0 0 30px var(--primary);
-    }
-
-    .section-tabs {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      padding: 15px;
-      background: rgba(10, 14, 23, 0.8);
-      backdrop-filter: blur(10px);
-    }
-
-    .carousel {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      position: relative;
-      padding: 0 80px;
-    }
-
-    .section {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.6s ease;
-    }
-
-    .section.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .cards {
-      display: flex;
-      transition: transform 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
-      gap: 35px;
-      padding: 0 120px;
-    }
-
-    .card {
-      min-width: 260px;
-      width: 260px;
-      height: 360px;
-      background-size: cover;
-      background-position: center;
-      border-radius: 24px;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
-      cursor: pointer;
-      transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-      filter: brightness(0.75);
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .card.active {
-      transform: scale(1.25);
-      filter: brightness(1);
-      z-index: 5;
-      box-shadow: 0 35px 70px var(--primary);
-      outline: 5px solid var(--primary);
-    }
-
-    .card:not(.active) {
-      opacity: 0.65;
-      transform: scale(0.92);
-    }
-
-    .card-title {
-      position: absolute;
-      bottom: 20px;
-      left: 0; right: 0;
-      text-align: center;
-      font-size: 1.4em;
-      background: rgba(0,0,0,0.7);
-      padding: 12px;
-      border-radius: 0 0 24px 24px;
-    }
-
-    .details {
-      position: absolute;
-      right: 30px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 380px;
-      padding: 30px;
-      background: rgba(10, 14, 23, 0.85);
-      backdrop-filter: blur(15px);
-      border-radius: 24px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-      z-index: 6;
-    }
-
-    .launch-btn {
-      margin-top: 30px;
-      padding: 18px 40px;
-      background: var(--primary);
-      border: none;
-      border-radius: 50px;
-      color: white;
-      font-size: 1.4em;
-      cursor: pointer;
-      box-shadow: 0 0 30px var(--primary);
-      text-transform: uppercase;
-    }
-
-    #app-window {
-      position: fixed;
-      inset: 0;
-      background: #000;
-      display: none;
-      flex-direction: column;
-      z-index: 50;
-    }
-
-    #app-header {
-      height: 60px;
-      background: rgba(0,122,255,0.95);
-      display: flex;
-      align-items: center;
-      padding: 0 30px;
-      justify-content: space-between;
-      font-size: 1.8em;
-    }
-
-    #close-app {
-      font-size: 34px;
-      cursor: pointer;
-    }
-
-    #app-iframe {
-      flex: 1;
-      border: none;
+    :root { 
+        --primary: #007aff; 
+        --secondary: #00aaff; 
+        --glass: rgba(255, 255, 255, 0.03);
+        --blur: 15px;
+        --card-radius: 20px;
+        --card-scale: 1.1;
+        --anim-speed: 0.6s;
+    }
+    body { margin: 0; font-family: 'Arial', sans-serif; background: #000; color: white; overflow: hidden; height: 100vh; user-select: none; touch-action: none; background-size: cover; background-position: center; }
+    
+    /* LIQUID GLASS LAYER */
+    .liquid-glass-pane {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.05) 100%);
+        pointer-events: none;
+        box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+    }
+    .liquid-glass-pane::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url('https://www.transparenttextures.com/patterns/glass-knobs.png');
+        opacity: 0.03;
+    }
+
+    /* PREMIUM OVERLAY EFFECTS */
+    #scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 50; background-size: 100% 4px, 3px 100%; pointer-events: none; display: none; }
+    #noise-layer { position: fixed; inset: 0; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.05; z-index: 49; pointer-events: none; display: none; filter: contrast(150%) brightness(100%); }
+
+    #glcanvas { position: fixed; inset: 0; z-index: -2; display: block; }
+    
+    .gui-overlay { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.6) 100%); z-index: -1; pointer-events: none; transition: background 0.5s; }
+
+    #loading-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 1.5s ease; }
+    #loading-screen.hidden { opacity: 0; pointer-events: none; }
+    .loading-bar-container { width: 300px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 5px; margin-top: 40px; overflow: hidden; position: relative; }
+    .loading-fill { width: 0%; height: 100%; background: var(--primary); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 15px var(--primary); }
+    .loading-text { margin-top: 15px; font-family: 'Orbitron'; font-size: 0.7em; letter-spacing: 2px; color: var(--secondary); animation: pulse 1.5s infinite; }
+    
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    #name-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 90; }
+    #name-screen.active { display: flex; }
+    .name-box { 
+        background: rgba(255,255,255,0.05); 
+        padding: 50px; 
+        border-radius: 30px; 
+        backdrop-filter: blur(var(--blur)); 
+        text-align: center; 
+        border: 1px solid rgba(255,255,255,0.1); 
+        box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.05); 
+    }
+    #name-input { padding: 18px; width: 280px; background: rgba(0,0,0,0.3); border: 1px solid var(--primary); border-radius: 12px; color: white; text-align: center; margin-bottom: 25px; outline: none; font-family: 'Orbitron'; font-size: 1em; transition: 0.3s; }
+    #name-input:focus { box-shadow: 0 0 20px var(--primary); border-color: var(--secondary); }
+    #name-btn { padding: 15px 50px; background: var(--primary); border: none; border-radius: 50px; color: white; cursor: pointer; font-weight: bold; font-family: 'Orbitron'; letter-spacing: 2px; transition: 0.3s; }
+    #name-btn:hover { background: var(--secondary); transform: scale(1.05); }
+
+    .container { display: flex; flex-direction: column; height: 100vh; opacity: 0; transition: opacity 1s ease; z-index: 1; }
+    .container.visible { opacity: 1; }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 15px 30px; }
+    .live-clock { font-size: 1.4em; color: var(--secondary); font-weight: bold; font-family: 'Dosis', sans-serif; }
+    
+    .section-tabs { display: flex; justify-content: flex-start; gap: 10px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; }
+    .tab { padding: 10px 25px; cursor: pointer; border-radius: 25px; transition: 0.3s; background: rgba(255,255,255,0.05); font-size: 0.8em; text-transform: uppercase; white-space: nowrap; border: 1px solid transparent; flex-shrink: 0; backdrop-filter: blur(5px); }
+    .tab.active { background: var(--primary); border-color: var(--secondary); box-shadow: 0 0 20px var(--primary); }
+
+    .carousel { flex: 1; display: flex; align-items: center; position: relative; overflow: hidden; cursor: grab; }
+    .section { position: absolute; width: 100%; display: none; height: 100%; align-items: center; }
+    .section.active { display: flex; }
+    .cards { display: flex; gap: 40px; transition: transform var(--anim-speed) cubic-bezier(0.2, 0.8, 0.2, 1); padding-left: 0; }
+    .card { min-width: 240px; height: 340px; background-size: cover; background-position: center; border-radius: var(--card-radius); position: relative; transition: all 0.5s; opacity: 0.25; transform: scale(0.85); cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
+    .card.active { 
+        opacity: 1; 
+        transform: scale(var(--card-scale)); 
+        outline: 4px solid var(--primary); 
+        box-shadow: 0 0 50px var(--primary), inset 0 0 30px rgba(255,255,255,0.1); 
+    }
+    .card-title { position: absolute; bottom: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.9)); text-align: center; padding: 25px 0 15px 0; border-radius: 0 0 var(--card-radius) var(--card-radius); font-weight: bold; pointer-events: none; }
+
+    .details { 
+        position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; 
+        padding: 20px; background: rgba(0,0,0,0.7); border-radius: 25px; 
+        backdrop-filter: blur(var(--blur)); text-align: center; 
+        border: 1px solid rgba(255,255,255,0.1); pointer-events: auto; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.05);
+    }
+    .launch-btn { width: 100%; padding: 15px; background: var(--primary); border: none; color: white; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 1.1em; }
+
+    #settings-panel { position: fixed; top: 0; right: -400px; width: 340px; height: 100vh; background: rgba(5,5,10,0.95); backdrop-filter: blur(25px); z-index: 300; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); padding: 30px; border-left: 1px solid var(--primary); overflow-y: auto; box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+    #settings-panel.open { right: 0; }
+    .setting-group { margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; }
+    .setting-label { display: block; margin-bottom: 12px; font-size: 0.75em; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; }
+    .premium-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px; color: white; border-radius: 8px; margin-bottom: 10px; outline: none; box-sizing: border-box; }
+    .premium-slider { width: 100%; accent-color: var(--primary); cursor: pointer; }
+
+    #app-window { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; z-index: 200; }
+    #app-header { height: 60px; background: var(--primary); display: flex; align-items: center; padding: 0 25px; justify-content: space-between; }
+    #app-iframe { flex: 1; border: none; }
+
+    .rgb-mode .card.active { animation: rgb-glow 3s linear infinite; }
+    @keyframes rgb-glow {
+        0% { outline-color: #ff0000; box-shadow: 0 0 30px #ff0000; }
+        33% { outline-color: #00ff00; box-shadow: 0 0 30px #00ff00; }
+        66% { outline-color: #0000ff; box-shadow: 0 0 30px #0000ff; }
+        100% { outline-color: #ff0000; box-shadow: 0 0 30px #ff0000; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Loading Screen -->
+  <canvas id="glcanvas"></canvas>
+  <div class="liquid-glass-pane"></div>
+  <div id="scanlines"></div>
+  <div id="noise-layer"></div>
+  <div class="gui-overlay" id="overlay"></div>
+
   <div id="loading-screen">
-    <div class="particles" id="particles"></div>
-
-    <div class="ps5-logo-container">
-      <svg class="ps5-logo" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="150" cy="150" r="120" fill="none" stroke="#007aff" stroke-width="15" opacity="0.6"/>
-        <path d="M100 150 Q150 70, 200 150" fill="none" stroke="#007aff" stroke-width="20" stroke-linecap="round"/>
-        <circle cx="150" cy="150" r="40" fill="none" stroke="#007aff" stroke-width="15"/>
-        <path d="M120 150 L150 180 L180 150" fill="none" stroke="#007aff" stroke-width="15" stroke-linecap="round"/>
-        <rect x="135" y="135" width="30" height="30" rx="8" fill="none" stroke="#007aff" stroke-width="12"/>
-      </svg>
+    <div style="width: 100px; height: 100px;">
+        <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="150" cy="150" r="120" fill="none" stroke="#007aff" stroke-width="15" />
+            <path d="M100 150 Q150 70, 200 150" fill="none" stroke="#007aff" stroke-width="20" stroke-linecap="round"/>
+            <rect x="135" y="135" width="30" height="30" rx="5" fill="#007aff" />
+        </svg>
     </div>
-
-    <div class="loading-title">
-      <span>D</span><span>A</span><span>S</span><span>H</span><span>B</span><span>O</span><span>A</span><span>R</span><span>D</span>
-    </div>
-
-    <div class="loading-bar-container">
-      <div class="loading-fill" id="loading-fill"></div>
-    </div>
+    <div class="loading-bar-container"><div class="loading-fill" id="loading-fill"></div></div>
+    <div class="loading-text" id="loading-status">INITIALIZING SYSTEMS...</div>
   </div>
 
-  <!-- Name Screen -->
   <div id="name-screen">
     <div class="name-box">
-      <h1>Welcome</h1>
-      <input type="text" id="name-input" placeholder="Enter your name" maxlength="20">
-      <button id="name-btn">Continue</button>
+      <h1 style="font-family:'Orbitron'; margin-bottom: 10px; color: var(--primary);">IDENTIFICATION</h1>
+      <p style="font-size: 0.7em; color: rgba(255,255,255,0.5); margin-bottom: 30px; letter-spacing: 2px;">PLEASE ENTER OPERATOR NAME</p>
+      <input type="text" id="name-input" placeholder="Operator ID" autocomplete="off">
+      <br>
+      <button id="name-btn">AUTHORIZE</button>
     </div>
   </div>
 
-  <!-- Background layers -->
-  <div class="background" id="background"></div>
-  <div class="gui-overlay"></div>
-
-  <!-- Main Dashboard -->
   <div class="container" id="main-container">
     <div class="header">
-      <div class="header-left">
-        <h1 id="user-greeting">roblox's Dashboard</h1>
-        <div class="live-clock" id="live-clock"></div>
-      </div>
-      <div class="settings-btn" id="settings-btn">
-        <div class="settings-icon">⚙️</div>
-      </div>
-    </div>
-
-    <!-- Settings Panel -->
-    <div id="settings-panel">
-      <div class="settings-header">
-        <h2>Settings</h2>
-        <div class="close-settings" id="close-settings">×</div>
-      </div>
-
-      <div class="theme-section">
-        <h3>Choose Theme</h3>
-        <div class="themes-grid">
-          <div class="theme-option active" data-p="#007aff" data-s="#00aaff">
-            <div class="theme-color" style="--p:#007aff;--s:#00aaff;"></div>
-            <div class="theme-name">Blue</div>
-          </div>
-          <div class="theme-option" data-p="#9d4edd" data-s="#d787ff">
-            <div class="theme-color" style="--p:#9d4edd;--s:#d787ff;"></div>
-            <div class="theme-name">Purple</div>
-          </div>
-          <div class="theme-option" data-p="#00d4aa" data-s="#00f5a0">
-            <div class="theme-color" style="--p:#00d4aa;--s:#00f5a0;"></div>
-            <div class="theme-name">Green</div>
-          </div>
-          <div class="theme-option" data-p="#ff8c00" data-s="#ff6b00">
-            <div class="theme-color" style="--p:#ff8c00;--s:#ff6b00;"></div>
-            <div class="theme-name">Orange</div>
-          </div>
-          <div class="theme-option" data-p="#ff8bdc" data-s="#ff2a6d">
-            <div class="theme-color" style="--p:#ff8bdc;--s:#ff2a6d;"></div>
-            <div class="theme-name">Pink</div>
-          </div>
-          <div class="theme-option" data-p="#ff9500" data-s="#ff3b30">
-            <div class="theme-color" style="--p:#ff9500;--s:#ff3b30;"></div>
-            <div class="theme-name">Red</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="version-info">
-        Version <strong>1.1.2</strong><br>
-        More updates coming soon...
-      </div>
+      <div><h1 id="user-greeting" style="margin:0; font-size:1.2em;">DASHBOARD</h1><div class="live-clock" id="live-clock">00:00:00</div></div>
+      <div id="settings-btn" style="font-size: 24px; cursor: pointer; background: rgba(255,255,255,0.1); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">⚙️</div>
     </div>
 
     <div class="section-tabs">
-      <div class="tab active" data-section="proxy">Proxy</div>
-      <div class="tab" data-section="ai">AI</div>
-      <div class="tab" data-section="games">Games & Emulators</div>
+      <div class="tab active" data-section="proxy">Network</div>
+      <div class="tab" data-section="ai">Intelligence</div>
+      <div class="tab" data-section="media">Media</div>
+      <div class="tab" data-section="games">Software</div>
     </div>
 
-    <div class="carousel">
-      <!-- All sections and cards - exactly as you provided -->
+    <div class="carousel" id="carousel-viewport">
       <div class="section active" id="proxy-section">
         <div class="cards" id="proxy-cards">
-          <div class="card active"
-               style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7gaDPF7UZyqMvHCg16jkM9w0n5WzVhZlw7A&s');"
-               data-title="Main Proxy"
-               data-desc="Secure proxy browsing."
-               data-bg="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7gaDPF7UZyqMvHCg16jkM9w0n5WzVhZlw7A&s"
-               data-url="https://sciences.drsanjay.com.au/">
-            <div class="card-title">Main Proxy</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcSRtrRTnU8suWDygvkAvHCQ-i39bCgE7mkw&s');"
-               data-title="Stealth Proxy"
-               data-desc="Undetectable browsing."
-               data-bg="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcSRtrRTnU8suWDygvkAvHCQ-i39bCgE7mkw&s"
-               data-url="https://sciences.drsanjay.com.au/">
-            <div class="card-title">Proxy by Anderson</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://cyberpedia.reasonlabs.com/IMG/proxy%20server.jpg');"
-               data-title="Fast Proxy"
-               data-desc="High-speed connection."
-               data-bg="https://cyberpedia.reasonlabs.com/IMG/proxy%20server.jpg"
-               data-url="https://vseesa.quasar.ploteando.com/">
-            <div class="card-title">Fast Proxy</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqXoNnPklxzy5zR5YndSh139Xs8nZ8Jdj1Ug&s');"
-               data-title="Proxy Hub"
-               data-desc="Multiple server options."
-               data-bg="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqXoNnPklxzy5zR5YndSh139Xs8nZ8Jdj1Ug&s"
-               data-url="https://cargolux.starnightimport.com/">
-            <div class="card-title">Proxy Hub</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPNWup5WQNCln_0aTySZ5Into1o1VAI3TTow&s');"
-               data-title="Anonymous Proxy"
-               data-desc="Complete anonymity."
-               data-bg="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPNWup5WQNCln_0aTySZ5Into1o1VAI3TTow&s"
-               data-url="https://sciences.drsanjay.com.au/">
-            <div class="card-title">Anonymous Proxy</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3RDElb3ekISL8x7uxmhhpG66pXWqu8r7k0A&s');"
-               data-title="Secure Proxy"
-               data-desc="Encrypted traffic."
-               data-bg="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3RDElb3ekISL8x7uxmhhpG66pXWqu8r7k0A&s"
-               data-url="https://sciences.drsanjay.com.au/">
-            <div class="card-title">Secure Proxy</div>
-          </div>
+          <div class="card active" style="background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400');" data-title="Ultraviolet" data-desc="Node 1: Premium high-speed proxy." data-url="https://sciences.drsanjay.com.au/"><div class="card-title">Ultraviolet</div></div>
+          <div class="card" style="background-image: url('https://images.unsplash.com/photo-1563986768609-322da13575f3?w=400');" data-title="Nebula" data-desc="Node 2: Stealth network relay." data-url="#"><div class="card-title">Nebula</div></div>
+          <div class="card" style="background-image: url('https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400');" data-title="Rammerhead" data-desc="Node 3: Persistent session tech." data-url="#"><div class="card-title">Rammerhead</div></div>
         </div>
       </div>
 
-      <div class="section" id="ai-section">
-        <div class="cards" id="ai-cards">
-          <div class="card active"
-               style="background-image: url('https://images.stockcake.com/public/1/b/4/1b411215-b8c4-4859-aa96-757915fb8f99_large/human-ai-interface-stockcake.jpg');"
-               data-title="Digital AI"
-               data-desc="Advanced digital AI chat."
-               data-bg="https://thumbs.dreamstime.com/b/metaverse-fantasy-concept-person-visits-futuristic-cyber-city-generative-ai-virtual-fantastic-world-theme-portal-vr-268666913.jpg"
-               data-url="https://digitalprotgtemplate-38441.chipp.ai/w/chat/">
-            <div class="card-title">Digital AI</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://wallpapercave.com/wp/wp10724398.jpg');"
-               data-title="ChatGPT"
-               data-desc="OpenAI's powerful model."
-               data-bg="https://wallpapercave.com/wp/wp10724398.jpg"
-               data-url="https://chat.openai.com">
-            <div class="card-title">ChatGPT</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://wallpapercave.com/wp/wp12234567.jpg');"
-               data-title="Grok"
-               data-desc="xAI's helpful assistant."
-               data-bg="https://wallpapercave.com/wp/wp12234567.jpg"
-               data-url="https://grok.x.ai">
-            <div class="card-title">Grok</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://i.imgur.com/3d5eR9k.jpg');"
-               data-title="Claude"
-               data-desc="Anthropic's safe AI."
-               data-bg="https://i.imgur.com/3d5eR9k.jpg"
-               data-url="https://claude.ai">
-            <div class="card-title">Claude</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://wallpapercave.com/wp/wp11456789.jpg');"
-               data-title="Gemini"
-               data-desc="Google's multimodal AI."
-               data-bg="https://wallpapercave.com/wp/wp11456789.jpg"
-               data-url="https://gemini.google.com">
-            <div class="card-title">Gemini</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://wallpapercave.com/wp/wp12567890.jpg');"
-               data-title="Perplexity"
-               data-desc="AI search engine."
-               data-bg="https://wallpapercave.com/wp/wp12567890.jpg"
-               data-url="https://www.perplexity.ai">
-            <div class="card-title">Perplexity</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://wallpapercave.com/wp/wp13098765.jpg');"
-               data-title="Mistral"
-               data-desc="Open-source AI model."
-               data-bg="https://wallpapercave.com/wp/wp13098765.jpg">
-            <div class="card-title">Mistral</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section" id="games-section">
-        <div class="cards" id="games-cards">
-          <div class="card active"
-               style="background-image: url('https://wallpapers.com/images/featured/ubuntu-z6rtxbp6rijb53hx.jpg');"
-               data-title="Linux Emulator"
-               data-desc="Full Ubuntu environment."
-               data-bg="https://wallpapers.com/images/featured/ubuntu-z6rtxbp6rijb53hx.jpg"
-               data-url="https://www.winfy.net/runwine/index.php?os=winegui_2_ubuntu-22-amd64">
-            <div class="card-title">Linux Emulator</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202008/1020/Kq7iou5mZ9y6HlbF7QGCGS2P.jpg');"
-               data-title="Astro's Playroom"
-               data-desc="Fun platformer."
-               data-bg="https://wallpapercave.com/wp/wp6980742.jpg">
-            <div class="card-title">Astro's Playroom</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202008/1300/5JzcA5RKo3i3p1t2Q0qXzQ.png');"
-               data-title="Spider-Man: Miles Morales"
-               data-desc="Superhero action."
-               data-bg="https://wallpapercave.com/wp/wp6623882.jpg">
-            <div class="card-title">Spider-Man</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202011/0319/1mC3Ve0x5A7MIRl1K5Wc1u4B.png');"
-               data-title="God of War Ragnarök"
-               data-desc="Epic mythology."
-               data-bg="https://wallpapercave.com/wp/wp10567890.jpg">
-            <div class="card-title">God of War</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202009/2819/8pF8X4U1M2k3l4n5o6p7q8r9.jpg');"
-               data-title="Horizon Forbidden West"
-               data-desc="Beautiful open world."
-               data-bg="https://wallpapercave.com/wp/wp9876543.jpg">
-            <div class="card-title">Horizon</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202106/2815/0vPqL8X9Y7Z6A5B4C3D2E1F0.jpg');"
-               data-title="Gran Turismo 7"
-               data-desc="Racing simulator."
-               data-bg="https://wallpapercave.com/wp/wp8765432.jpg">
-            <div class="card-title">GT7</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202108/1021/1a2b3c4d5e6f7g8h9i0j.jpg');"
-               data-title="Returnal"
-               data-desc="Roguelike shooter."
-               data-bg="https://wallpapercave.com/wp/wp7654321.jpg">
-            <div class="card-title">Returnal</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://image.api.playstation.com/vulcan/ap/rnd/202111/3011/0Z8p8f5g6h7i8j9k0l.jpg');"
-               data-title="Ratchet & Clank"
-               data-desc="Dimension-hopping fun."
-               data-bg="https://wallpapercave.com/wp/wp8835718.jpg">
-            <div class="card-title">Ratchet & Clank</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://wallpapercave.com/wp/wp4059432.jpg');"
-               data-title="Roblox"
-               data-desc="Create and play games."
-               data-bg="https://wallpapercave.com/wp/wp4059432.jpg"
-               data-url="https://www.roblox.com">
-            <div class="card-title">Roblox</div>
-          </div>
-          <div class="card"
-               style="background-image: url('https://wallpapercave.com/wp/wp5868375.jpg');"
-               data-title="Discord"
-               data-desc="Voice & text chat."
-               data-bg="https://wallpapercave.com/wp/wp5868375.jpg"
-               data-url="https://discord.com">
-            <div class="card-title">Discord</div>
-          </div>
-        </div>
-      </div>
+      <div class="section" id="ai-section"><div class="cards" id="ai-cards"></div></div>
+      <div class="section" id="media-section"><div class="cards" id="media-cards"></div></div>
+      <div class="section" id="games-section"><div class="cards" id="games-cards"></div></div>
     </div>
 
-    <div class="details" id="details">
-      <h1>Main Proxy</h1>
-      <p>Secure proxy browsing.</p>
-      <button class="launch-btn" id="launch-btn">Launch</button>
+    <div class="details">
+      <h2 id="detail-title" style="margin:0 0 5px 0; color:var(--secondary);">Select Interface</h2>
+      <p id="detail-desc" style="margin:0 0 15px 0; opacity:0.8;">Ready for deployment.</p>
+      <button class="launch-btn" id="launch-btn">EXECUTE</button>
     </div>
+  </div>
+
+  <div id="settings-panel">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+        <h2 style="margin:0; font-size:1.1em; font-family:'Orbitron'">PREMIUM CONFIG</h2>
+        <span id="close-settings" style="cursor:pointer; font-size:28px;">×</span>
+    </div>
+
+    <div class="setting-group">
+        <label class="setting-label">Accent Color (Hex)</label>
+        <div style="display:flex; gap:10px;">
+            <input type="color" id="accent-picker" class="premium-input" style="width:50px; padding:2px; height:40px;" value="#007aff">
+            <input type="text" id="accent-hex" class="premium-input" placeholder="#007aff">
+        </div>
+    </div>
+
+    <div class="setting-group">
+        <label class="setting-label">Custom Wallpaper (URL)</label>
+        <input type="text" id="bg-input" class="premium-input" placeholder="https://image.url/pic.jpg">
+        <button id="apply-bg" style="width:100%; padding:8px; background:var(--primary); border:none; color:white; border-radius:5px; cursor:pointer;">Set Wallpaper</button>
+    </div>
+
+    <div class="setting-group">
+        <label class="setting-label">Interface Blur Intensity</label>
+        <input type="range" id="blur-slider" class="premium-slider" min="0" max="40" value="15">
+    </div>
+
+    <div class="setting-group">
+        <label class="setting-label">Menu Carousel Speed</label>
+        <input type="range" id="speed-slider" class="premium-slider" min="1" max="15" value="6">
+    </div>
+
+    <div class="setting-group">
+        <label class="setting-label">Active Card Focus Scale</label>
+        <input type="range" id="scale-slider" class="premium-slider" min="10" max="15" value="11">
+    </div>
+
+    <div class="setting-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label class="setting-label" style="margin:0;">Sci-Fi Typography</label>
+            <input type="checkbox" id="font-toggle">
+        </div>
+    </div>
+
+    <div class="setting-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label class="setting-label" style="margin:0;">RGB Glow Mode</label>
+            <input type="checkbox" id="rgb-toggle">
+        </div>
+    </div>
+
+    <div class="setting-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label class="setting-label" style="margin:0;">Retro Scanlines</label>
+            <input type="checkbox" id="scanline-toggle">
+        </div>
+    </div>
+
+    <div class="setting-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label class="setting-label" style="margin:0;">Digital Grain/Noise</label>
+            <input type="checkbox" id="noise-toggle">
+        </div>
+    </div>
+
+    <button id="reset-prefs" style="width:100%; padding:12px; background:rgba(255,50,50,0.1); color:#ff5555; border:1px solid #ff5555; border-radius:8px; cursor:pointer; font-weight:bold;">FACTORY RESET</button>
   </div>
 
   <div id="app-window">
-    <div id="app-header">
-      <span id="app-title">App</span>
-      <span id="close-app">×</span>
-    </div>
-    <iframe id="app-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"></iframe>
+    <div id="app-header"><span id="app-title">Application</span><span id="close-app" style="cursor:pointer; font-size:30px;">×</span></div>
+    <iframe id="app-iframe"></iframe>
   </div>
 
   <script>
-    // Particles
-    const particlesContainer = document.getElementById('particles');
-    for (let i = 0; i < 30; i++) {
-      const particle = document.createElement('div');
-      particle.classList.add('particle');
-      particle.style.left = Math.random() * 100 + 'vw';
-      particle.style.animationDelay = Math.random() * 8 + 's';
-      particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-      particlesContainer.appendChild(particle);
-    }
+    /* POPULATOR ENGINE */
+    const extraSections = {
+        ai: [
+            { title: "ChatGPT", desc: "GPT-4 Architecture", img: "https://images.unsplash.com/photo-1676299081847-c0326a033355?w=400", url: "https://chatgpt.com" },
+            { title: "Claude", desc: "Analytical Reasoning", img: "https://images.unsplash.com/photo-1620712943543-bcc4638ef7b9?w=400", url: "https://claude.ai" },
+            { title: "Gemini", desc: "Multimodal Processing", img: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=400", url: "https://gemini.google.com" },
+            { title: "Perplexity", desc: "Search Intelligence", img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400", url: "https://perplexity.ai" }
+        ],
+        media: [
+            { title: "YouTube", desc: "Global Video Stream", img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400", url: "https://youtube.com" },
+            { title: "Spotify", desc: "Hi-Fi Music Library", img: "https://images.unsplash.com/photo-1614680376593-902f74cc0d41?w=400", url: "https://spotify.com" },
+            { title: "Discord", desc: "Encrypted Chat Hub", img: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=400", url: "https://discord.com" },
+            { title: "Netflix", desc: "Cinematic Access", img: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400", url: "https://netflix.com" }
+        ],
+        games: [
+            { title: "Roblox", desc: "Virtual Experiences", img: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400", url: "https://roblox.com" },
+            { title: "VS Code", desc: "Dev Environment", img: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=400", url: "https://vscode.dev" },
+            { title: "GitHub", desc: "Source Repo Access", img: "https://images.unsplash.com/photo-1618401471353-b98aadebc25a?w=400", url: "https://github.com" },
+            { title: "GeForce Now", desc: "Cloud Gaming", img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400", url: "https://play.geforcenow.com" }
+        ]
+    };
 
-    document.querySelectorAll('.loading-title span').forEach((span, i) => {
-      span.style.animationDelay = (i * 0.1 + 1.5) + 's';
+    Object.keys(extraSections).forEach(key => {
+        const container = document.getElementById(`${key}-cards`);
+        extraSections[key].forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = `card ${index === 0 ? 'active' : ''}`;
+            card.style.backgroundImage = `url('${item.img}')`;
+            card.dataset.title = item.title;
+            card.dataset.desc = item.desc;
+            card.dataset.url = item.url;
+            card.innerHTML = `<div class="card-title">${item.title}</div>`;
+            container.appendChild(card);
+        });
     });
 
-    // Loading & Name
-    const loadingFill = document.getElementById('loading-fill');
-    const loadingScreen = document.getElementById('loading-screen');
-    const nameScreen = document.getElementById('name-screen');
-    const mainContainer = document.getElementById('main-container');
-    const userGreeting = document.getElementById('user-greeting');
-
-    let progress = 0;
-    const loadingInterval = setInterval(() => {
-      progress += Math.random() * 12 + 3;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(loadingInterval);
-        loadingFill.style.width = '100%';
-        setTimeout(() => {
-          loadingScreen.classList.add('hidden');
-          setTimeout(() => nameScreen.classList.add('active'), 600);
-        }, 1000);
+    /* BLACK HOLE ENGINE */
+    (function() {
+      const canvas = document.getElementById('glcanvas');
+      const gl = canvas.getContext('webgl');
+      const vs = `attribute vec2 a_position; void main() { gl_Position = vec4(a_position, 0.0, 1.0); }`;
+      const fs = `precision mediump float; uniform float t; uniform vec2 r; uniform vec2 u_offset; uniform float u_zoom;
+        vec2 myTanh(vec2 x) { vec2 ex = exp(x), emx = exp(-x); return (ex - emx) / (ex + emx); }
+        void main() {
+          vec2 uv = (gl_FragCoord.xy * 2.0 - r) / r.y;
+          vec2 p_base = (uv * u_zoom) - u_offset;
+          vec4 o_bg = vec4(0.0), o_anim = vec4(0.0);
+          { vec2 p_img = p_base * mat2(1.0, -1.0, 1.0, 1.0); vec2 l_val = myTanh(p_img * 5.0 + 2.0); l_val = min(l_val, l_val * 3.0);
+            float s_px = abs(p_img.x) < 0.001 ? 0.001 : p_img.x;
+            float term = (0.1 - max(0.01 - dot(p_img, p_img) / 200.0, 0.0) * ((clamp(l_val, -2.0, 0.0).y - l_val.y) / s_px)) / abs(length(p_img) - 0.7);
+            o_bg += vec4(term); o_bg *= max(o_bg, vec4(0.0)); }
+          { vec2 p_anim = p_base / 0.7, d = vec2(-1.0, 1.0); float den = 0.1 + 5.0 / dot(5.0 * p_anim - d, 5.0 * p_anim - d);
+            vec2 c = p_anim * mat2(1.0, 1.0, d.x / den, d.y / den), v = c;
+            v *= mat2(cos(log(length(v)) + t * 0.2 + vec4(0.0, 33.0, 11.0, 0.0))) * 5.0;
+            vec4 acc = vec4(0.0); for (int i = 1; i <= 7; i++) { acc += sin(vec4(v.x, v.y, v.y, v.x)) + 1.0; v += 0.7 * sin(vec2(v.y, v.x) * float(i) + t) / float(i) + 0.5; }
+            o_anim += 1.0 - exp(-exp(c.x * vec4(0.6, -0.4, -1.0, 0.0)) / acc / (0.1 + 0.1 * pow(length(sin(v / 0.3) * 0.2 + c * vec2(1.0, 2.0)) - 1.0, 2.0)) / (1.0 + 7.0 * exp(0.3 * c.y - dot(c, c))) / (0.03 + abs(length(p_anim) - 0.7)) * 0.2); }
+          gl_FragColor = clamp(mix(o_bg, o_anim, 0.5) * 1.5, 0.0, 1.0);
+        }`;
+      const prog = gl.createProgram();
+      const s = (t, c) => { const sh = gl.createShader(t); gl.shaderSource(sh, c); gl.compileShader(sh); return sh; };
+      gl.attachShader(prog, s(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, s(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(prog); gl.useProgram(prog);
+      const rLoc = gl.getUniformLocation(prog, 'r'), tLoc = gl.getUniformLocation(prog, 't'), oLoc = gl.getUniformLocation(prog, 'u_offset'), zLoc = gl.getUniformLocation(prog, 'u_zoom');
+      const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
+      const p = gl.getAttribLocation(prog, 'a_position'); gl.enableVertexAttribArray(p); gl.vertexAttribPointer(p, 2, gl.FLOAT, false, 0, 0);
+      let zoom = 1.0, ox = 0.0, oy = 0.0, lx, ly, isD = false;
+      window.addEventListener('mousedown', e => { if(e.target === canvas) { isD = true; lx = e.clientX; ly = e.clientY; }});
+      window.addEventListener('mousemove', e => { if(!isD) return; ox += ((e.clientX - lx) / canvas.height) * 2.0 * zoom; oy -= ((e.clientY - ly) / canvas.height) * 2.0 * zoom; lx = e.clientX; ly = e.clientY; });
+      window.addEventListener('mouseup', () => isD = false);
+      function render(now) {
+        gl.uniform2f(rLoc, canvas.width, canvas.height); gl.uniform1f(tLoc, now * 0.001); gl.uniform2f(oLoc, ox, oy); gl.uniform1f(zLoc, zoom);
+        gl.drawArrays(gl.TRIANGLES, 0, 6); requestAnimationFrame(render);
       }
-      loadingFill.style.width = progress + '%';
-    }, 200);
+      window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; gl.viewport(0, 0, canvas.width, canvas.height); });
+      window.dispatchEvent(new Event('resize')); requestAnimationFrame(render);
+    })();
 
-    const nameInput = document.getElementById('name-input');
-    const nameBtn = document.getElementById('name-btn');
-    nameBtn.addEventListener('click', saveName);
-    nameInput.addEventListener('keypress', e => { if (e.key === 'Enter') saveName(); });
+    /* CAROUSEL ENGINE */
+    let startX = 0, prevTranslate = 0, isDragging = false, activeIndex = 0;
 
-    function saveName() {
-      let name = nameInput.value.trim() || 'roblox';
-      userGreeting.textContent = `${name}'s Dashboard`;
-      nameScreen.style.opacity = '0';
-      setTimeout(() => {
-        nameScreen.style.display = 'none';
-        mainContainer.classList.add('visible');
-        startLiveClock();
-      }, 800);
-    }
-
-    // Live Clock
-    function startLiveClock() {
-      const clock = document.getElementById('live-clock');
-      function update() {
-        const now = new Date();
-        const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-        clock.textContent = now.toLocaleTimeString(undefined, options);
-      }
-      update();
-      setInterval(update, 1000);
-    }
-
-    // Settings Panel & Theme Switch
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsPanel = document.getElementById('settings-panel');
-    const closeSettings = document.getElementById('close-settings');
-    const themeOptions = document.querySelectorAll('.theme-option');
-
-    settingsBtn.addEventListener('click', () => settingsPanel.classList.add('open'));
-    closeSettings.addEventListener('click', () => settingsPanel.classList.remove('open'));
-
-    document.addEventListener('click', (e) => {
-      if (!settingsPanel.contains(e.target) && !settingsBtn.contains(e.target) && settingsPanel.classList.contains('open')) {
-        settingsPanel.classList.remove('open');
-      }
-    });
-
-    themeOptions.forEach(option => {
-      option.addEventListener('click', () => {
-        themeOptions.forEach(o => o.classList.remove('active'));
-        option.classList.add('active');
-
-        const p = option.dataset.p;
-        const s = option.dataset.s;
-
-        document.documentElement.style.setProperty('--primary', p);
-        document.documentElement.style.setProperty('--secondary', s);
-      });
-    });
-
-    // Original carousel & navigation logic
-    const tabs = document.querySelectorAll('.tab');
-    const sections = document.querySelectorAll('.section');
-    let currentSection = 'proxy';
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const target = tab.dataset.section;
-        if (target === currentSection) return;
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        sections.forEach(s => s.classList.remove('active'));
-        document.getElementById(target + '-section').classList.add('active');
-        currentSection = target;
-        resetCarousel(target);
-      });
-    });
-
-    function resetCarousel(section) {
-      const container = document.getElementById(section + '-cards');
+    function initCarousel(id) {
+      const container = document.getElementById(`${id}-cards`);
       const cards = container.querySelectorAll('.card');
-      cards.forEach((c, i) => c.classList.toggle('active', i === 0));
-      const activeCard = cards[0];
-      document.querySelector('#details h1').textContent = activeCard.dataset.title;
-      document.querySelector('#details p').textContent = activeCard.dataset.desc;
-      document.getElementById('background').style.backgroundImage = `url(${activeCard.dataset.bg})`;
-      const cardWidth = cards[0].offsetWidth + 35;
-      const offset = (window.innerWidth / 2 - cardWidth / 2);
-      container.style.transform = `translateX(${offset}px)`;
-      cards.forEach((card, i) => card.onclick = () => updateActiveSection(section, i));
+      activeIndex = 0;
+      updatePosition(container, cards);
+
+      container.onmousedown = container.ontouchstart = (e) => {
+        isDragging = true;
+        startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        container.style.transition = 'none';
+      };
+
+      window.onmousemove = window.ontouchmove = (e) => {
+        if (!isDragging) return;
+        const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const walk = (x - startX);
+        container.style.transform = `translateX(${prevTranslate + walk}px)`;
+      };
+
+      window.onmouseup = window.ontouchend = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        container.style.transition = 'transform var(--anim-speed) cubic-bezier(0.2, 0.8, 0.2, 1)';
+        const center = window.innerWidth / 2;
+        let minDistance = Infinity;
+        cards.forEach((card, i) => {
+          const rect = card.getBoundingClientRect();
+          const dist = Math.abs(center - (rect.left + rect.width / 2));
+          if (dist < minDistance) { minDistance = dist; activeIndex = i; }
+        });
+        updatePosition(container, cards);
+      };
+      cards.forEach((c, i) => { c.onclick = () => { activeIndex = i; updatePosition(container, cards); }; });
     }
 
-    function updateActiveSection(section, index) {
-      const container = document.getElementById(section + '-cards');
-      const cards = container.querySelectorAll('.card');
-      cards.forEach((c, i) => c.classList.toggle('active', i === index));
-      const activeCard = cards[index];
-      document.querySelector('#details h1').textContent = activeCard.dataset.title;
-      document.querySelector('#details p').textContent = activeCard.dataset.desc;
-      document.getElementById('background').style.backgroundImage = `url(${activeCard.dataset.bg})`;
-      const cardWidth = cards[0].offsetWidth + 35;
-      const offset = -index * cardWidth + (window.innerWidth / 2 - cardWidth / 2);
+    function updatePosition(container, cards) {
+      const cardWidth = 240 + 40;
+      const offset = (window.innerWidth / 2) - (cardWidth * activeIndex) - (240 / 2);
+      prevTranslate = offset;
       container.style.transform = `translateX(${offset}px)`;
+      cards.forEach((c, i) => {
+        c.classList.toggle('active', i === activeIndex);
+        if(i === activeIndex) {
+          document.getElementById('detail-title').innerText = c.dataset.title;
+          document.getElementById('detail-desc').innerText = c.dataset.desc;
+        }
+      });
     }
 
-    document.getElementById('launch-btn').addEventListener('click', () => {
-      const activeCard = document.querySelector('.section.active .card.active');
-      if (activeCard && activeCard.dataset.url) {
-        document.getElementById('app-iframe').src = activeCard.dataset.url;
-        document.getElementById('app-title').textContent = activeCard.dataset.title;
+    /* PREMIUM SETTINGS ENGINE */
+    const premiumActions = {
+        accent: (hex) => {
+            document.documentElement.style.setProperty('--primary', hex);
+            document.documentElement.style.setProperty('--secondary', hex + 'aa');
+            document.getElementById('accent-picker').value = hex;
+            document.getElementById('accent-hex').value = hex;
+        },
+        bg: (url) => { document.body.style.backgroundImage = url ? `url('${url}')` : 'none'; document.getElementById('glcanvas').style.opacity = url ? '0' : '1'; },
+        blur: (val) => document.documentElement.style.setProperty('--blur', val + 'px'),
+        speed: (val) => document.documentElement.style.setProperty('--anim-speed', (val / 10) + 's'),
+        scale: (val) => document.documentElement.style.setProperty('--card-scale', val/10),
+        font: (state) => document.body.style.fontFamily = state ? "'Orbitron', sans-serif" : "'Arial', sans-serif"
+    };
+
+    document.getElementById('settings-btn').onclick = () => document.getElementById('settings-panel').classList.add('open');
+    document.getElementById('close-settings').onclick = () => document.getElementById('settings-panel').classList.remove('open');
+
+    // Accent logic
+    document.getElementById('accent-picker').oninput = (e) => {
+        premiumActions.accent(e.target.value);
+        localStorage.setItem('mega-accent', e.target.value);
+    };
+    document.getElementById('accent-hex').onchange = (e) => {
+        premiumActions.accent(e.target.value);
+        localStorage.setItem('mega-accent', e.target.value);
+    };
+
+    document.getElementById('apply-bg').onclick = () => {
+        const url = document.getElementById('bg-input').value;
+        premiumActions.bg(url);
+        localStorage.setItem('mega-custom-bg', url);
+    };
+
+    document.getElementById('blur-slider').oninput = (e) => {
+        premiumActions.blur(e.target.value);
+        localStorage.setItem('mega-blur', e.target.value);
+    };
+
+    document.getElementById('speed-slider').oninput = (e) => {
+        premiumActions.speed(e.target.value);
+        localStorage.setItem('mega-speed', e.target.value);
+    };
+
+    document.getElementById('scale-slider').oninput = (e) => {
+        premiumActions.scale(e.target.value);
+        localStorage.setItem('mega-scale', e.target.value);
+    };
+
+    document.getElementById('font-toggle').onchange = (e) => {
+        premiumActions.font(e.target.checked);
+        localStorage.setItem('mega-font', e.target.checked);
+    };
+
+    document.getElementById('rgb-toggle').onchange = (e) => {
+        document.body.classList.toggle('rgb-mode', e.target.checked);
+        localStorage.setItem('mega-rgb', e.target.checked);
+    };
+
+    document.getElementById('scanline-toggle').onchange = (e) => {
+        document.getElementById('scanlines').style.display = e.target.checked ? 'block' : 'none';
+        localStorage.setItem('mega-scanlines', e.target.checked);
+    };
+
+    document.getElementById('noise-toggle').onchange = (e) => {
+        document.getElementById('noise-layer').style.display = e.target.checked ? 'block' : 'none';
+        localStorage.setItem('mega-noise', e.target.checked);
+    };
+
+    document.getElementById('reset-prefs').onclick = () => { localStorage.clear(); location.reload(); };
+
+    /* TAB SYSTEM */
+    document.querySelectorAll('.tab').forEach(t => {
+      t.onclick = () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); t.classList.add('active');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(t.dataset.section + '-section').classList.add('active');
+        initCarousel(t.dataset.section);
+      };
+    });
+
+    /* APP LAUNCHER */
+    document.getElementById('launch-btn').onclick = () => {
+      const active = document.querySelector('.section.active .card.active');
+      if(active && active.dataset.url !== "#") {
+        document.getElementById('app-iframe').src = active.dataset.url;
         document.getElementById('app-window').style.display = 'flex';
       }
-    });
+    };
+    document.getElementById('close-app').onclick = () => { 
+        document.getElementById('app-window').style.display = 'none'; 
+        document.getElementById('app-iframe').src = ''; 
+    };
 
-    document.getElementById('close-app').addEventListener('click', () => {
-      document.getElementById('app-window').style.display = 'none';
-      document.getElementById('app-iframe').src = '';
-    });
+    /* INITIALIZATION & PERSISTENCE */
+    window.onload = () => {
+        const savedName = localStorage.getItem('mega-name');
+        const savedAccent = localStorage.getItem('mega-accent');
+        const savedRGB = localStorage.getItem('mega-rgb') === 'true';
+        const savedScan = localStorage.getItem('mega-scanlines') === 'true';
+        const savedNoise = localStorage.getItem('mega-noise') === 'true';
+        const savedBG = localStorage.getItem('mega-custom-bg');
+        const savedBlur = localStorage.getItem('mega-blur');
+        const savedSpeed = localStorage.getItem('mega-speed');
+        const savedScale = localStorage.getItem('mega-scale');
+        const savedFont = localStorage.getItem('mega-font') === 'true';
 
-    document.addEventListener('keydown', e => {
-      if (document.getElementById('app-window').style.display === 'flex') return;
-      const activeSectionEl = document.querySelector('.section.active');
-      const cards = activeSectionEl.querySelectorAll('.card');
-      let idx = Array.from(cards).findIndex(c => c.classList.contains('active'));
-      if (e.key === 'ArrowRight') updateActiveSection(currentSection, (idx + 1) % cards.length);
-      if (e.key === 'ArrowLeft') updateActiveSection(currentSection, (idx - 1 + cards.length) % cards.length);
-      if (e.key === 'Enter') document.getElementById('launch-btn').click();
-    });
+        if(savedAccent) premiumActions.accent(savedAccent);
+        if(savedRGB) { document.getElementById('rgb-toggle').checked = true; document.body.classList.add('rgb-mode'); }
+        if(savedScan) { document.getElementById('scanline-toggle').checked = true; document.getElementById('scanlines').style.display = 'block'; }
+        if(savedNoise) { document.getElementById('noise-toggle').checked = true; document.getElementById('noise-layer').style.display = 'block'; }
+        if(savedBG) { document.getElementById('bg-input').value = savedBG; premiumActions.bg(savedBG); }
+        if(savedBlur) { document.getElementById('blur-slider').value = savedBlur; premiumActions.blur(savedBlur); }
+        if(savedSpeed) { document.getElementById('speed-slider').value = savedSpeed; premiumActions.speed(savedSpeed); }
+        if(savedScale) { document.getElementById('scale-slider').value = savedScale; premiumActions.scale(savedScale); }
+        if(savedFont) { document.getElementById('font-toggle').checked = true; premiumActions.font(true); }
 
-    let touchStartX = 0;
-    document.querySelector('.carousel').addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
-    document.querySelector('.carousel').addEventListener('touchend', e => {
-      const diff = touchStartX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 50) {
-        const activeSectionEl = document.querySelector('.section.active');
-        const cards = activeSectionEl.querySelectorAll('.card');
-        let idx = Array.from(cards).findIndex(c => c.classList.contains('active'));
-        const newIdx = diff > 0 ? (idx + 1) % cards.length : (idx - 1 + cards.length) % cards.length;
-        updateActiveSection(currentSection, newIdx);
-      }
-    });
+        let prog = 0;
+        const statusMsgs = ["SYNCHING CORES...", "BYPASSING FIREWALLS...", "DECRYPTING ASSETS...", "UPLOADING DATA...", "READY."];
+        
+        let lI = setInterval(() => {
+            prog += Math.random() * 3.5; 
+            if(prog > 100) prog = 100;
+            
+            document.getElementById('loading-fill').style.width = prog + '%';
+            document.getElementById('loading-status').innerText = statusMsgs[Math.floor((prog/100) * (statusMsgs.length - 1))];
 
-    resetCarousel('proxy');
+            if(prog >= 100) {
+                clearInterval(lI);
+                setTimeout(() => {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    if(savedName) {
+                        document.getElementById('user-greeting').innerText = savedName.toUpperCase();
+                        document.getElementById('main-container').classList.add('visible');
+                        initCarousel('proxy');
+                    } else {
+                        document.getElementById('name-screen').classList.add('active');
+                    }
+                }, 800);
+            }
+        }, 120);
+    };
+
+    document.getElementById('name-btn').onclick = () => {
+        const name = document.getElementById('name-input').value || 'OPERATOR';
+        localStorage.setItem('mega-name', name);
+        document.getElementById('user-greeting').innerText = name.toUpperCase();
+        document.getElementById('name-screen').classList.remove('active');
+        document.getElementById('main-container').classList.add('visible');
+        initCarousel('proxy');
+    };
+
+    setInterval(() => document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(), 1000);
   </script>
 </body>
 </html>
