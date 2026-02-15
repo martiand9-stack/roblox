@@ -17,7 +17,6 @@
     }
     body { margin: 0; font-family: 'Arial', sans-serif; background: #000; color: white; overflow: hidden; height: 100vh; user-select: none; touch-action: none; background-size: cover; background-position: center; }
     
-    /* LIQUID GLASS LAYER */
     .liquid-glass-pane {
         position: fixed;
         inset: 0;
@@ -34,8 +33,7 @@
         opacity: 0.03;
     }
 
-    /* PREMIUM OVERLAY EFFECTS */
-    #scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); z-index: 50; background-size: 100% 4px, 3px 100%; pointer-events: none; display: none; }
+    #scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03)); z-index: 50; background-size: 100% 4px, 3px 100%; pointer-events: none; display: none; }
     #noise-layer { position: fixed; inset: 0; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.05; z-index: 49; pointer-events: none; display: none; filter: contrast(150%) brightness(100%); }
 
     #glcanvas { position: fixed; inset: 0; z-index: -2; display: block; }
@@ -97,7 +95,7 @@
     }
     .launch-btn { width: 100%; padding: 15px; background: var(--primary); border: none; color: white; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 1.1em; }
 
-    #settings-panel { position: fixed; top: 0; right: -400px; width: 340px; height: 100vh; background: rgba(5,5,10,0.95); backdrop-filter: blur(25px); z-index: 300; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); padding: 30px; border-left: 1px solid var(--primary); overflow-y: auto; box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+    #settings-panel { position: fixed; top: 0; right: -400px; width: 340px; height: 100vh; background: rgba(5,5,10,0.95); backdrop-filter: blur(25px); z-index: 400; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); padding: 30px; border-left: 1px solid var(--primary); overflow-y: auto; box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
     #settings-panel.open { right: 0; }
     .setting-group { margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; }
     .setting-label { display: block; margin-bottom: 12px; font-size: 0.75em; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; }
@@ -115,6 +113,133 @@
         66% { outline-color: #0000ff; box-shadow: 0 0 30px #0000ff; }
         100% { outline-color: #ff0000; box-shadow: 0 0 30px #ff0000; }
     }
+
+    /* --- DYNAMIC ISLAND PLAYER STYLES --- */
+    .dynamic-island-container {
+        position: fixed;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 300;
+        display: flex;
+        justify-content: center;
+        perspective: 1000px;
+    }
+
+    .player-card {
+        width: 150px; 
+        height: 35px;
+        padding: 5px 15px;
+        border-radius: 45px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
+        transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .player-card.expanded {
+        width: 340px;
+        height: 520px;
+        padding: 35px;
+        border-radius: 45px;
+        flex-direction: column;
+        justify-content: center;
+        gap: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        cursor: default;
+    }
+
+    .album-art {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background: linear-gradient(to bottom right, var(--primary), var(--secondary));
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.5s ease;
+    }
+    .album-art::after { content: '🎵'; font-size: 12px; opacity: 0.8; }
+
+    .player-card.expanded .album-art {
+        width: 200px;
+        height: 200px;
+        border-radius: 25px;
+    }
+    .player-card.expanded .album-art::after { font-size: 80px; }
+
+    .track-info {
+        text-align: left;
+        flex-grow: 1;
+        margin: 0 10px;
+        transition: all 0.5s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        display: block;
+    }
+
+    .player-card:not(.expanded) .track-info {
+        max-width: 80px;
+    }
+
+    .player-card.expanded .track-info {
+        text-align: center;
+        width: 100%;
+        margin: 0;
+    }
+
+    .track-title { font-size: 0.75rem; font-weight: 700; }
+    .player-card.expanded .track-title { font-size: 1.4rem; }
+    .track-artist { font-size: 0.6rem; opacity: 0.6; }
+
+    .progress-container {
+        width: 100%;
+        height: 14px; /* Slightly taller for easier interaction */
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+    }
+    .player-card.expanded .progress-container { display: flex; }
+
+    .progress-bg { position: absolute; left: 0; width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; pointer-events: none; }
+    .progress-fill { position: absolute; left: 0; height: 6px; width: 0%; background: var(--primary); border-radius: 10px; transition: width 0.1s linear; pointer-events: none; }
+
+    .player-card.playing .progress-fill {
+        height: 12px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 4'%3E%3Cpath d='M0,2 Q2.5,4 5,2 T10,2 T15,2 T20,2' fill='none' stroke='white' stroke-width='2' /%3E%3C/svg%3E");
+        background-size: 20px 100%;
+        animation: moveWave 0.5s linear infinite;
+    }
+    @keyframes moveWave { 0% { background-position: 0 0; } 100% { background-position: -20px 0; } }
+
+    .controls { display: flex; align-items: center; gap: 5px; }
+    .player-card.expanded .controls { justify-content: space-between; width: 80%; margin-top: 10px; }
+
+    .btn { background: none; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .btn-main { width: 25px; height: 25px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+    .player-card.expanded .btn-main { width: 70px; height: 70px; background: rgba(255, 255, 255, 0.1); }
+    
+    .btn-side { display: none; opacity: 0; }
+    .player-card.expanded .btn-side { display: flex; opacity: 0.8; }
+
+    .icon { width: 16px; height: 16px; fill: currentColor; }
+    .player-card.expanded .icon { width: 28px; height: 28px; }
+
+    .time-labels { display: none; justify-content: space-between; width: 100%; font-size: 0.75rem; color: #aaa; }
+    .player-card.expanded .time-labels { display: flex; }
+
   </style>
 </head>
 <body>
@@ -124,6 +249,35 @@
   <div id="scanlines"></div>
   <div id="noise-layer"></div>
   <div class="gui-overlay" id="overlay"></div>
+
+  <div class="dynamic-island-container">
+    <audio id="audio" preload="metadata">
+        <source src="https://github.com/martiand9-stack/roblox/raw/refs/heads/main/msht,%20STXSTN%20-%20FREAKTEKK%20(Official%20Audio).mp3" type="audio/mpeg">
+    </audio>
+    <div class="player-card" id="playerCard">
+        <div class="album-art"></div>
+        <div class="track-info">
+            <div class="track-title">FREAKTEKK</div>
+            <div class="track-artist">msht, STXSTN</div>
+        </div>
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bg"></div>
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="time-labels">
+            <span id="currentTime">0:00</span>
+            <span id="duration">0:00</span>
+        </div>
+        <div class="controls">
+            <button class="btn btn-side"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+            <button class="btn btn-main" id="playBtn">
+                <svg class="icon" id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="icon" id="pauseIcon" viewBox="0 0 24 24" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <button class="btn btn-side"><svg class="icon" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+        </div>
+    </div>
+  </div>
 
   <div id="loading-screen">
     <div style="width: 100px; height: 100px;">
@@ -168,7 +322,6 @@
           <div class="card" style="background-image: url('https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400');" data-title="Rammerhead" data-desc="Node 3: Persistent session tech." data-url="#"><div class="card-title">Rammerhead</div></div>
         </div>
       </div>
-
       <div class="section" id="ai-section"><div class="cards" id="ai-cards"></div></div>
       <div class="section" id="media-section"><div class="cards" id="media-cards"></div></div>
       <div class="section" id="games-section"><div class="cards" id="games-cards"></div></div>
@@ -186,7 +339,6 @@
         <h2 style="margin:0; font-size:1.1em; font-family:'Orbitron'">PREMIUM CONFIG</h2>
         <span id="close-settings" style="cursor:pointer; font-size:28px;">×</span>
     </div>
-
     <div class="setting-group">
         <label class="setting-label">Accent Color (Hex)</label>
         <div style="display:flex; gap:10px;">
@@ -194,56 +346,47 @@
             <input type="text" id="accent-hex" class="premium-input" placeholder="#007aff">
         </div>
     </div>
-
     <div class="setting-group">
         <label class="setting-label">Custom Wallpaper (URL)</label>
         <input type="text" id="bg-input" class="premium-input" placeholder="https://image.url/pic.jpg">
         <button id="apply-bg" style="width:100%; padding:8px; background:var(--primary); border:none; color:white; border-radius:5px; cursor:pointer;">Set Wallpaper</button>
     </div>
-
     <div class="setting-group">
         <label class="setting-label">Interface Blur Intensity</label>
         <input type="range" id="blur-slider" class="premium-slider" min="0" max="40" value="15">
     </div>
-
     <div class="setting-group">
         <label class="setting-label">Menu Carousel Speed</label>
         <input type="range" id="speed-slider" class="premium-slider" min="1" max="15" value="6">
     </div>
-
     <div class="setting-group">
         <label class="setting-label">Active Card Focus Scale</label>
         <input type="range" id="scale-slider" class="premium-slider" min="10" max="15" value="11">
     </div>
-
     <div class="setting-group">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <label class="setting-label" style="margin:0;">Sci-Fi Typography</label>
             <input type="checkbox" id="font-toggle">
         </div>
     </div>
-
     <div class="setting-group">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <label class="setting-label" style="margin:0;">RGB Glow Mode</label>
             <input type="checkbox" id="rgb-toggle">
         </div>
     </div>
-
     <div class="setting-group">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <label class="setting-label" style="margin:0;">Retro Scanlines</label>
             <input type="checkbox" id="scanline-toggle">
         </div>
     </div>
-
     <div class="setting-group">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <label class="setting-label" style="margin:0;">Digital Grain/Noise</label>
             <input type="checkbox" id="noise-toggle">
         </div>
     </div>
-
     <button id="reset-prefs" style="width:100%; padding:12px; background:rgba(255,50,50,0.1); color:#ff5555; border:1px solid #ff5555; border-radius:8px; cursor:pointer; font-weight:bold;">FACTORY RESET</button>
   </div>
 
@@ -253,7 +396,71 @@
   </div>
 
   <script>
-    /* POPULATOR ENGINE */
+    /* SEEKABLE PLAYER LOGIC */
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const progressFill = document.getElementById('progressFill');
+    const progressContainer = document.getElementById('progressContainer');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const playerCard = document.getElementById('playerCard');
+
+    // Click behavior for the card (Expansion)
+    playerCard.onclick = (e) => {
+        // If clicking controls or progress bar, don't collapse
+        if(e.target.closest('#playBtn') || e.target.closest('#progressContainer')) return;
+        playerCard.classList.toggle('expanded');
+    };
+
+    // Play/Pause button
+    playBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (audio.paused) { audio.play(); updatePlayState(true); } 
+        else { audio.pause(); updatePlayState(false); }
+    };
+
+    // --- CONTROLLABLE STRING (SEEKING) ---
+    progressContainer.onclick = (e) => {
+        e.stopPropagation(); // Keep card open
+        const rect = progressContainer.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const width = rect.width;
+        const duration = audio.duration;
+        
+        if (duration && width > 0) {
+            audio.currentTime = (clickX / width) * duration;
+        }
+    };
+
+    function updatePlayState(isPlaying) {
+        if (isPlaying) {
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'block';
+            playerCard.classList.add('playing');
+        } else {
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+            playerCard.classList.remove('playing');
+        }
+    }
+
+    audio.ontimeupdate = () => {
+        const progressPercent = (audio.currentTime / audio.duration) * 100;
+        progressFill.style.width = `${progressPercent}%`;
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+        if(audio.duration) durationEl.textContent = formatTime(audio.duration);
+    };
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const min = Math.floor(seconds / 60);
+        const sec = Math.floor(seconds % 60);
+        return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    /* ALL ORIGINAL DASHBOARD SCRIPTING STARTS HERE */
     const extraSections = {
         ai: [
             { title: "ChatGPT", desc: "GPT-4 Architecture", img: "https://images.unsplash.com/photo-1676299081847-c0326a033355?w=400", url: "https://chatgpt.com" },
@@ -399,57 +606,16 @@
     document.getElementById('settings-btn').onclick = () => document.getElementById('settings-panel').classList.add('open');
     document.getElementById('close-settings').onclick = () => document.getElementById('settings-panel').classList.remove('open');
 
-    // Accent logic
-    document.getElementById('accent-picker').oninput = (e) => {
-        premiumActions.accent(e.target.value);
-        localStorage.setItem('mega-accent', e.target.value);
-    };
-    document.getElementById('accent-hex').onchange = (e) => {
-        premiumActions.accent(e.target.value);
-        localStorage.setItem('mega-accent', e.target.value);
-    };
-
-    document.getElementById('apply-bg').onclick = () => {
-        const url = document.getElementById('bg-input').value;
-        premiumActions.bg(url);
-        localStorage.setItem('mega-custom-bg', url);
-    };
-
-    document.getElementById('blur-slider').oninput = (e) => {
-        premiumActions.blur(e.target.value);
-        localStorage.setItem('mega-blur', e.target.value);
-    };
-
-    document.getElementById('speed-slider').oninput = (e) => {
-        premiumActions.speed(e.target.value);
-        localStorage.setItem('mega-speed', e.target.value);
-    };
-
-    document.getElementById('scale-slider').oninput = (e) => {
-        premiumActions.scale(e.target.value);
-        localStorage.setItem('mega-scale', e.target.value);
-    };
-
-    document.getElementById('font-toggle').onchange = (e) => {
-        premiumActions.font(e.target.checked);
-        localStorage.setItem('mega-font', e.target.checked);
-    };
-
-    document.getElementById('rgb-toggle').onchange = (e) => {
-        document.body.classList.toggle('rgb-mode', e.target.checked);
-        localStorage.setItem('mega-rgb', e.target.checked);
-    };
-
-    document.getElementById('scanline-toggle').onchange = (e) => {
-        document.getElementById('scanlines').style.display = e.target.checked ? 'block' : 'none';
-        localStorage.setItem('mega-scanlines', e.target.checked);
-    };
-
-    document.getElementById('noise-toggle').onchange = (e) => {
-        document.getElementById('noise-layer').style.display = e.target.checked ? 'block' : 'none';
-        localStorage.setItem('mega-noise', e.target.checked);
-    };
-
+    document.getElementById('accent-picker').oninput = (e) => { premiumActions.accent(e.target.value); localStorage.setItem('mega-accent', e.target.value); };
+    document.getElementById('accent-hex').onchange = (e) => { premiumActions.accent(e.target.value); localStorage.setItem('mega-accent', e.target.value); };
+    document.getElementById('apply-bg').onclick = () => { const url = document.getElementById('bg-input').value; premiumActions.bg(url); localStorage.setItem('mega-custom-bg', url); };
+    document.getElementById('blur-slider').oninput = (e) => { premiumActions.blur(e.target.value); localStorage.setItem('mega-blur', e.target.value); };
+    document.getElementById('speed-slider').oninput = (e) => { premiumActions.speed(e.target.value); localStorage.setItem('mega-speed', e.target.value); };
+    document.getElementById('scale-slider').oninput = (e) => { premiumActions.scale(e.target.value); localStorage.setItem('mega-scale', e.target.value); };
+    document.getElementById('font-toggle').onchange = (e) => { premiumActions.font(e.target.checked); localStorage.setItem('mega-font', e.target.checked); };
+    document.getElementById('rgb-toggle').onchange = (e) => { document.body.classList.toggle('rgb-mode', e.target.checked); localStorage.setItem('mega-rgb', e.target.checked); };
+    document.getElementById('scanline-toggle').onchange = (e) => { document.getElementById('scanlines').style.display = e.target.checked ? 'block' : 'none'; localStorage.setItem('mega-scanlines', e.target.checked); };
+    document.getElementById('noise-toggle').onchange = (e) => { document.getElementById('noise-layer').style.display = e.target.checked ? 'block' : 'none'; localStorage.setItem('mega-noise', e.target.checked); };
     document.getElementById('reset-prefs').onclick = () => { localStorage.clear(); location.reload(); };
 
     /* TAB SYSTEM */
@@ -470,12 +636,9 @@
         document.getElementById('app-window').style.display = 'flex';
       }
     };
-    document.getElementById('close-app').onclick = () => { 
-        document.getElementById('app-window').style.display = 'none'; 
-        document.getElementById('app-iframe').src = ''; 
-    };
+    document.getElementById('close-app').onclick = () => { document.getElementById('app-window').style.display = 'none'; document.getElementById('app-iframe').src = ''; };
 
-    /* INITIALIZATION & PERSISTENCE */
+    /* INITIALIZATION */
     window.onload = () => {
         const savedName = localStorage.getItem('mega-name');
         const savedAccent = localStorage.getItem('mega-accent');
@@ -500,14 +663,11 @@
 
         let prog = 0;
         const statusMsgs = ["SYNCHING CORES...", "BYPASSING FIREWALLS...", "DECRYPTING ASSETS...", "UPLOADING DATA...", "READY."];
-        
         let lI = setInterval(() => {
             prog += Math.random() * 3.5; 
             if(prog > 100) prog = 100;
-            
             document.getElementById('loading-fill').style.width = prog + '%';
             document.getElementById('loading-status').innerText = statusMsgs[Math.floor((prog/100) * (statusMsgs.length - 1))];
-
             if(prog >= 100) {
                 clearInterval(lI);
                 setTimeout(() => {
@@ -516,9 +676,7 @@
                         document.getElementById('user-greeting').innerText = savedName.toUpperCase();
                         document.getElementById('main-container').classList.add('visible');
                         initCarousel('proxy');
-                    } else {
-                        document.getElementById('name-screen').classList.add('active');
-                    }
+                    } else { document.getElementById('name-screen').classList.add('active'); }
                 }, 800);
             }
         }, 120);
