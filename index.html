@@ -148,12 +148,12 @@
 
     .player-card.expanded {
         width: 340px;
-        height: 520px;
+        height: 580px; /* Taller to fit track selector */
         padding: 35px;
         border-radius: 45px;
         flex-direction: column;
         justify-content: center;
-        gap: 20px;
+        gap: 15px;
         background: rgba(0, 0, 0, 0.8);
         cursor: default;
     }
@@ -172,11 +172,11 @@
     .album-art::after { content: '🎵'; font-size: 12px; opacity: 0.8; }
 
     .player-card.expanded .album-art {
-        width: 200px;
-        height: 200px;
+        width: 160px;
+        height: 160px;
         border-radius: 25px;
     }
-    .player-card.expanded .album-art::after { font-size: 80px; }
+    .player-card.expanded .album-art::after { font-size: 60px; }
 
     .track-info {
         text-align: left;
@@ -199,12 +199,37 @@
     }
 
     .track-title { font-size: 0.75rem; font-weight: 700; }
-    .player-card.expanded .track-title { font-size: 1.4rem; }
+    .player-card.expanded .track-title { font-size: 1.2rem; }
     .track-artist { font-size: 0.6rem; opacity: 0.6; }
+
+    /* Track Selection Option */
+    #track-selector {
+        display: none;
+        width: 100%;
+        background: rgba(255,255,255,0.05);
+        border-radius: 15px;
+        padding: 10px;
+        margin-top: 10px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .player-card.expanded #track-selector { display: block; }
+    .track-option {
+        padding: 8px 12px;
+        font-size: 0.7rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-bottom: 5px;
+        border: 1px solid transparent;
+        font-family: 'Orbitron';
+        text-align: left;
+    }
+    .track-option:hover { background: rgba(255,255,255,0.1); }
+    .track-option.active { border-color: var(--primary); background: rgba(0,122,255,0.2); }
 
     .progress-container {
         width: 100%;
-        height: 14px; /* Slightly taller for easier interaction */
+        height: 14px;
         display: none;
         align-items: center;
         justify-content: center;
@@ -229,15 +254,15 @@
 
     .btn { background: none; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .btn-main { width: 25px; height: 25px; background: rgba(255,255,255,0.1); border-radius: 50%; }
-    .player-card.expanded .btn-main { width: 70px; height: 70px; background: rgba(255, 255, 255, 0.1); }
+    .player-card.expanded .btn-main { width: 60px; height: 60px; background: rgba(255, 255, 255, 0.1); }
     
     .btn-side { display: none; opacity: 0; }
     .player-card.expanded .btn-side { display: flex; opacity: 0.8; }
 
     .icon { width: 16px; height: 16px; fill: currentColor; }
-    .player-card.expanded .icon { width: 28px; height: 28px; }
+    .player-card.expanded .icon { width: 24px; height: 24px; }
 
-    .time-labels { display: none; justify-content: space-between; width: 100%; font-size: 0.75rem; color: #aaa; }
+    .time-labels { display: none; justify-content: space-between; width: 100%; font-size: 0.7rem; color: #aaa; }
     .player-card.expanded .time-labels { display: flex; }
 
   </style>
@@ -251,15 +276,14 @@
   <div class="gui-overlay" id="overlay"></div>
 
   <div class="dynamic-island-container">
-    <audio id="audio" preload="metadata">
-        <source src="https://github.com/martiand9-stack/roblox/raw/refs/heads/main/msht,%20STXSTN%20-%20FREAKTEKK%20(Official%20Audio).mp3" type="audio/mpeg">
-    </audio>
+    <audio id="audio" preload="metadata"></audio>
     <div class="player-card" id="playerCard">
         <div class="album-art"></div>
         <div class="track-info">
-            <div class="track-title">FREAKTEKK</div>
-            <div class="track-artist">msht, STXSTN</div>
+            <div class="track-title" id="display-title">FREAKTEKK</div>
+            <div class="track-artist" id="display-artist">msht, STXSTN</div>
         </div>
+
         <div class="progress-container" id="progressContainer">
             <div class="progress-bg"></div>
             <div class="progress-fill" id="progressFill"></div>
@@ -268,13 +292,19 @@
             <span id="currentTime">0:00</span>
             <span id="duration">0:00</span>
         </div>
+
         <div class="controls">
-            <button class="btn btn-side"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+            <button class="btn btn-side" id="prevBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
             <button class="btn btn-main" id="playBtn">
                 <svg class="icon" id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 <svg class="icon" id="pauseIcon" viewBox="0 0 24 24" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             </button>
-            <button class="btn btn-side"><svg class="icon" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+            <button class="btn btn-side" id="nextBtn"><svg class="icon" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+        </div>
+
+        <div id="track-selector">
+            <div style="font-size: 0.5rem; opacity: 0.5; margin-bottom: 5px; letter-spacing: 1px;">DATABASE TRACKS</div>
+            <div id="track-list"></div>
         </div>
     </div>
   </div>
@@ -396,7 +426,21 @@
   </div>
 
   <script>
-    /* SEEKABLE PLAYER LOGIC */
+    /* MULTI-TRACK PLAYER LOGIC */
+    const playlist = [
+        {
+            title: "FREAKTEKK",
+            artist: "msht, STXSTN",
+            url: "https://github.com/martiand9-stack/roblox/raw/refs/heads/main/msht,%20STXSTN%20-%20FREAKTEKK%20(Official%20Audio).mp3"
+        },
+        {
+            title: "Riversmelt",
+            artist: "HERO FUNK",
+            url: "https://github.com/martiand9-stack/roblox/raw/refs/heads/main/HERO%20FUNK%20-%20Riversmelt%20(1).mp3"
+        }
+    ];
+
+    let currentTrackIndex = 0;
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('playBtn');
     const playIcon = document.getElementById('playIcon');
@@ -406,32 +450,67 @@
     const currentTimeEl = document.getElementById('currentTime');
     const durationEl = document.getElementById('duration');
     const playerCard = document.getElementById('playerCard');
+    const trackList = document.getElementById('track-list');
 
-    // Click behavior for the card (Expansion)
+    function initPlaylist() {
+        trackList.innerHTML = '';
+        playlist.forEach((track, index) => {
+            const opt = document.createElement('div');
+            opt.className = `track-option ${index === currentTrackIndex ? 'active' : ''}`;
+            opt.innerText = `${track.title} - ${track.artist}`;
+            opt.onclick = (e) => {
+                e.stopPropagation();
+                loadTrack(index);
+                audio.play();
+                updatePlayState(true);
+            };
+            trackList.appendChild(opt);
+        });
+    }
+
+    function loadTrack(index) {
+        currentTrackIndex = index;
+        const track = playlist[index];
+        audio.src = track.url;
+        document.getElementById('display-title').innerText = track.title;
+        document.getElementById('display-artist').innerText = track.artist;
+        initPlaylist();
+    }
+
+    loadTrack(0);
+
     playerCard.onclick = (e) => {
-        // If clicking controls or progress bar, don't collapse
-        if(e.target.closest('#playBtn') || e.target.closest('#progressContainer')) return;
+        if(e.target.closest('#playBtn') || e.target.closest('#progressContainer') || e.target.closest('.track-option') || e.target.closest('.btn-side')) return;
         playerCard.classList.toggle('expanded');
     };
 
-    // Play/Pause button
     playBtn.onclick = (e) => {
         e.stopPropagation();
         if (audio.paused) { audio.play(); updatePlayState(true); } 
         else { audio.pause(); updatePlayState(false); }
     };
 
-    // --- CONTROLLABLE STRING (SEEKING) ---
+    document.getElementById('nextBtn').onclick = (e) => {
+        e.stopPropagation();
+        currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+        loadTrack(currentTrackIndex);
+        audio.play();
+        updatePlayState(true);
+    };
+
+    document.getElementById('prevBtn').onclick = (e) => {
+        e.stopPropagation();
+        currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+        loadTrack(currentTrackIndex);
+        audio.play();
+        updatePlayState(true);
+    };
+
     progressContainer.onclick = (e) => {
-        e.stopPropagation(); // Keep card open
+        e.stopPropagation();
         const rect = progressContainer.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
-        const width = rect.width;
-        const duration = audio.duration;
-        
-        if (duration && width > 0) {
-            audio.currentTime = (clickX / width) * duration;
-        }
+        audio.currentTime = (clickX / rect.width) * audio.duration;
     };
 
     function updatePlayState(isPlaying) {
@@ -447,8 +526,7 @@
     }
 
     audio.ontimeupdate = () => {
-        const progressPercent = (audio.currentTime / audio.duration) * 100;
-        progressFill.style.width = `${progressPercent}%`;
+        progressFill.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
         currentTimeEl.textContent = formatTime(audio.currentTime);
         if(audio.duration) durationEl.textContent = formatTime(audio.duration);
     };
@@ -554,8 +632,7 @@
       window.onmousemove = window.ontouchmove = (e) => {
         if (!isDragging) return;
         const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        const walk = (x - startX);
-        container.style.transform = `translateX(${prevTranslate + walk}px)`;
+        container.style.transform = `translateX(${prevTranslate + (x - startX)}px)`;
       };
 
       window.onmouseup = window.ontouchend = () => {
